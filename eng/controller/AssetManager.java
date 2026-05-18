@@ -31,7 +31,7 @@ public class AssetManager {
 		SHADER_TID = 1, 
 		ATLAS_TID = 2,
 		ENTITY_TID = 3,
-		TEXT_TID = 4;
+		TEMPORARY_TID = 4; // Will overflow not meant to be a permanent id, expect it to be lost after current frame // Used primarily for text
 	
 	private Set<Asset> assets = new HashSet<>();
 	
@@ -51,11 +51,11 @@ public class AssetManager {
 		return getNewID(entityInc, ENTITY_TID);
 	}
 	
-	protected int textInc = -1;
+	protected int tempInc = -1;
 	
-	public int genTextID() {
-		textInc++;
-		return getNewID(textInc, TEXT_TID);
+	public int genTempID() {
+		tempInc++;
+		return getNewID(tempInc, TEMPORARY_TID);
 	}
 	
 	// Generate the new ID format

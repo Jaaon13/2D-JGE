@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import ecs.Entity;
-import graphical.componets.ESprite;
 import graphical.rendering.Renderer;
+import graphical.rendering.fonts.Text;
 import logger.Logger.LoggerInfo;
 
 public class RenderController {
@@ -27,11 +27,17 @@ public class RenderController {
 		
 	}
 	
+	public void setText(List<Text> text) {
+		renderImplementations.get(curRenderer).text = text;
+	}
+	
 	public void setRenderer(int id) {
 		
 		Controller.logger.log("Renderer set to ID of: " + id, LoggerInfo.INFO);
 		
 		curRenderer = id;
+		
+		renderImplementations.get(curRenderer).windowResized();
 	}
 	
 	public void addEntities(List<Entity> toDraw) {
@@ -55,6 +61,10 @@ public class RenderController {
 	
 	public int getTotalSpritesDrawn() {
 		return renderImplementations.get(curRenderer).trianglesDrawn;
+	}
+
+	public void windowResized() {
+		renderImplementations.get(curRenderer).windowResized();
 	}
 
 }

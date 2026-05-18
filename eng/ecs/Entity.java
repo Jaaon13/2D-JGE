@@ -1,47 +1,44 @@
 package ecs;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import controller.Controller;
 
 public class Entity {
 	
-	public Map<String, Componet> componets = new HashMap<>();
-	
 	// Can be used as a kind of pointer
-	public final int id = Controller.assets.genEntityID();
+	public final int id;
 
-	public Entity(List<Componet> cpnets) {
+	// Does not require manual addition to the Entity Manager with this route
+	public Entity(List<Componet> cpnets, EntityManager entities) {
+		
+		id = Controller.assets.genEntityID();
+		
+		entities.add(this);
 		
 		for(Componet c : cpnets) {
 			
-			componets.put(c.getName(), c);
+			entities.addComponet(id, c);
 			
 		}
 		
 	}
 	
-	public boolean containsComponet(String s) {
+	public Entity(List<Componet> cpnets, EntityManager entities, boolean isTemporary) {
 		
-		return componets.containsKey(s);
-		
-	}
-	
-	public boolean containsComponets(List<String> s) {
-		
-		int inc = 0;
-		
-		for(String str : s) {
-			
-			if(componets.containsKey(str)) {
-				inc++;
-			}
-			
+		if(!isTemporary) {
+			id = Controller.assets.genEntityID();
+		} else {
+			id = Controller.assets.genTempID();
 		}
 		
-		return inc == s.size();
+		entities.add(this);
+		
+		for(Componet c : cpnets) {
+			
+			entities.addComponet(id, c);
+			
+		}
 		
 	}
 	

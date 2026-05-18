@@ -1,26 +1,28 @@
 package graphical.rendering;
 
 import java.awt.Point;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
 import assets.Shader;
 import controller.Controller;
+import ecs.EngineComponets.PlainShape;
 import ecs.EngineComponets.Pos;
 import ecs.EngineComponets.Size;
 import ecs.EngineComponets.TextureC;
 import ecs.Entity;
-import graphical.componets.ESprite;
-import graphical.componets.Tags;
+import ecs.EntityManager;
+import graphical.rendering.fonts.Text;
+import graphical.rendering.fonts.TextFactory;
 import logger.Logger.LoggerInfo;
 
 public class BasicRenderer extends Renderer {
@@ -50,7 +52,7 @@ public class BasicRenderer extends Renderer {
 		// the byte length of the vertex, and the offset in bytes
 						
 		// Position
-		GL30.glVertexAttribPointer(0, 2, GL30.GL_HALF_FLOAT, false, vertexSize, 0);
+		GL30.glVertexAttribPointer(0, 2, GL30.GL_SHORT, false, vertexSize, 0);
 						
 		// Texture Position
 		GL30.glVertexAttribPointer(1, 2, GL30.GL_HALF_FLOAT, false, vertexSize, 4);
@@ -63,6 +65,8 @@ public class BasicRenderer extends Renderer {
 		textureShader = ((Shader) Controller.assets.load(path + "textVert.vert", path + "textFrag.frag")).getRawID();
 		colorShader = ((Shader) Controller.assets.load(path + "colorVert.vert", path + "colorFrag.frag")).getRawID();
 				
+		GL30.glUseProgram(textureShader);
+		
 		GL30.glUniform1i(GL30.glGetUniformLocation(textureShader, "text"), 0);
 			
 		GL30.glActiveTexture(GL30.GL_TEXTURE0);
@@ -75,15 +79,17 @@ public class BasicRenderer extends Renderer {
 
 	private class Meshes {
 		
-		public short[] vertexes = new short[entities.size() * 16];
-		public int[] indexes = new int[entities.size() * 6];
+		public short[] vertexes;
+		public int[] indexes;
 		
 		public Point camOff;
 		
 		final int width = Controller.globals.screenSize.x;
 		final int height = Controller.globals.screenSize.y;
 		
-		public Meshes() {
+		public Meshes(int totalToDraw) {
+			vertexes = new short[totalToDraw * 16];
+			indexes = new int[totalToDraw * 6];
 			Arrays.fill(vertexes, (short) -1);
 			Arrays.fill(indexes, -1);
 			camOff = (camera) ? Controller.globals.camera.pos : new Point(0, 0);
@@ -94,29 +100,29 @@ public class BasicRenderer extends Renderer {
 		// Used as the index value
 		private int indinc = 0;
 		
-		private void addEntity(Entity e) {
+		private void addEntity(Entity e, EntityManager em) {
 			
-			if(!e.containsComponets(List.of("Pos", "Size"))) {
+			if(!em.contains(e, List.of(Pos.class, Size.class))) {
 				Controller.logger.log(
 						List.of("BASIC RENDERER: Tried to render an invalid entity.", "ID: " + e.id), LoggerInfo.ERROR);
 				return;
-			} else if(!e.containsComponet("TextureC") && !e.containsComponet("PlainShape") ) {
+			} else if(!em.contains(e, TextureC.class) && !em.contains(e, PlainShape.class) ) {
 				Controller.logger.log(
 						List.of("BASIC RENDERER: Tried to render an entity without a rendering option.", "ID: " + e.id), LoggerInfo.ERROR);
 				return;
 			}
 			
-			Pos posComp = (Pos) e.componets.get("Pos");
-			Size sizeComp = (Size) e.componets.get("Size");
+			Pos posComp = (Pos) em.get(e, Pos.class);
+			Size sizeComp = (Size) em.get(e, Size.class);
 			
-			boolean usesAtlas = (e.containsComponet("TextureC"))
-					? ((((TextureC) e.componets.get("TextureC")).atlas != null) ? true : false) : false;
+			boolean usesAtlas = (em.contains(e, TextureC.class))
+					? ((((TextureC) em.get(e, TextureC.class)).atlas != null) ? true : false) : false;
 			
-			TextureC t = (usesAtlas) ? (TextureC) e.componets.get("TextureC") : null;
+			TextureC t = (usesAtlas) ? (TextureC) em.get(e, TextureC.class) : null;
 			
 			Point newPos = (Controller.globals.camera != null) ? 
-					new Point(posComp.x - Controller.globals.camera.pos.x, height - (height - posComp.y - Controller.globals.camera.pos.y)):
-					new Point(posComp.x, height - posComp.y);
+					new Point(posComp.x - Controller.globals.camera.pos.x, (posComp.y - Controller.globals.camera.pos.y)):
+					new Point(posComp.x, posComp.y);
 			
 			// Check if the atlas exists if not set it to one so when we divide w/ it, it cannot alter sizing
 			float atlasSizeX = (usesAtlas) ? (float) t.texture.atlas.size.x : 1f;
@@ -130,32 +136,32 @@ public class BasicRenderer extends Renderer {
 			
 			// Top left
 				// Position
-			vertexes[vertPointer] = toHalfFloat(normal(newPos.x, width));
-			vertexes[vertPointer + 1] = toHalfFloat(normal(newPos.y, height));
+			vertexes[vertPointer] = (short) (newPos.x);
+			vertexes[vertPointer + 1] = (short) (newPos.y + sizeComp.y);
 				// Texture Cords
 			vertexes[vertPointer + 2] = toHalfFloat((float) tl.x / atlasSizeX);
 			vertexes[vertPointer + 3] = toHalfFloat((float) tl.y / atlasSizeY);
 			
 			// Top Right
 				// Position
-			vertexes[vertPointer + 4] = toHalfFloat(normal(newPos.x + sizeComp.x, width));
-			vertexes[vertPointer + 5] = toHalfFloat(normal(newPos.y, height));
+			vertexes[vertPointer + 4] = (short) (newPos.x + sizeComp.x);
+			vertexes[vertPointer + 5] = (short) (newPos.y + sizeComp.y);
 				// Texture Cords
 			vertexes[vertPointer + 6] = toHalfFloat((float) tr.x / atlasSizeX);
 			vertexes[vertPointer + 7] = toHalfFloat((float) tr.y / atlasSizeY);
 			
 			// Bottom Right
 				// Position
-			vertexes[vertPointer + 8] = toHalfFloat(normal(newPos.x + sizeComp.x, width));
-			vertexes[vertPointer + 9] = toHalfFloat(normal(newPos.y + sizeComp.y, height));
+			vertexes[vertPointer + 8] = (short) (newPos.x + sizeComp.x);
+			vertexes[vertPointer + 9] = (short) (newPos.y);
 				// Texture Cords
 			vertexes[vertPointer + 10] = toHalfFloat((float) br.x / atlasSizeX);
 			vertexes[vertPointer + 11] = toHalfFloat((float) br.y / atlasSizeY);
 			
 			// Bottom left
 				// Position
-			vertexes[vertPointer + 12] = toHalfFloat(normal(newPos.x, width));
-			vertexes[vertPointer + 13] = toHalfFloat(normal(newPos.y + sizeComp.y, height));
+			vertexes[vertPointer + 12] = (short) (newPos.x);
+			vertexes[vertPointer + 13] = (short) (newPos.y);
 				// Texture Cords
 			vertexes[vertPointer + 14] = toHalfFloat((float) bl.x / atlasSizeX);
 			vertexes[vertPointer + 15] = toHalfFloat((float) bl.y / atlasSizeY);
@@ -207,53 +213,16 @@ public class BasicRenderer extends Renderer {
 	
 	public boolean camera;
 	
-	public void textureRender(Meshes m, int key, ByteBuffer vertex, ByteBuffer index) {
+	public void textureRender(Meshes m, int key) {
+	
+		GL30.glUseProgram(textureShader);
 		
 		GL30.glBindTexture(GL30.GL_TEXTURE_2D, key);
 		
-		// Populate the byte buffers
+		GL30.glBufferData(GL30.GL_ARRAY_BUFFER, m.getVertexes(), GL30.GL_DYNAMIC_DRAW);
+		GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, m.getIndexes(), GL30.GL_DYNAMIC_DRAW);
 		
-		short[] vertexes = m.getVertexes();
-		
-		vertex.clear();
-		vertex.limit((vertexes.length * 2));
-		
-		for(short s : vertexes) {
-			try {
-				vertex.putShort(s);
-			} catch(Exception e) {
-				
-				System.err.println("BYTEBUFFER OVERFLOW : VERTEX");
-				System.out.println("Limit: " + vertex.limit() + " Cap: " + vertex.capacity());
-				
-			}
-		}
-		
-		int[] indexes = m.getIndexes();
-		
-		index.clear();
-		index.limit((indexes.length * 4));
-		
-		for(int i : indexes) {
-			try {
-				index.putInt(i);
-			} catch(Exception e) {
-				
-				System.err.println("BYTEBUFFER OVERFLOW : INDEX");
-				System.out.println("Limit: " + index.limit() + " Cap: " + index.capacity());
-				
-			}
-		}
-		
-		vertex.flip();
-		index.flip();
-		
-		GL30.glUseProgram(textureShader);
-		
-		GL30.glBufferData(GL30.GL_ARRAY_BUFFER, vertex, GL30.GL_DYNAMIC_DRAW);
-		GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, index, GL30.GL_DYNAMIC_DRAW);
-		
-		GL30.glDrawElements(GL30.GL_TRIANGLES, index.remaining(), GL30.GL_UNSIGNED_INT, 0);
+		GL30.glDrawElements(GL30.GL_TRIANGLES, m.getIndexes().length, GL30.GL_UNSIGNED_INT, 0);
 		
 		drawCalls++;
 		
@@ -267,6 +236,42 @@ public class BasicRenderer extends Renderer {
 		
 	}
 	
+	EntityManager em = new EntityManager();
+	
+	private void renderText() {
+		
+		int id = Controller.assets.get(Controller.globals.dir + "\\eng\\graphical\\rendering\\fonts\\minogram_6x10.png").getRawID();
+		
+		int total = 0;
+		
+		for(Text t : text) {
+			total += t.data.length();
+		}
+		
+		// Private helper objects
+		em.clear();
+		Meshes meshes = new Meshes(total);
+		
+		for(Text t : text) {
+			
+			if(t.data.isEmpty()) {continue;}
+			
+			TextFactory.generateText(t.data, t.pos, t.alignment, em, true);
+			
+		}
+		
+		for(Entity e : em.getVisible()) {
+			
+			meshes.addEntity(e, em);
+			
+		}
+		
+		textureRender(meshes, id);
+		
+	}
+	
+	private Matrix4f projection;
+	
 	@Override
 	public void render() {
 		
@@ -275,13 +280,9 @@ public class BasicRenderer extends Renderer {
 		
 		if(!GLFW.glfwWindowShouldClose(Controller.globals.window)) {
 			
-			// Clear the frame buffer
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			GL30.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
 						
 			// Start Rendering //
-			
-			ByteBuffer vertex =  ByteBuffer.allocateDirect((entities.size() * vertexSize) * 4).order(ByteOrder.nativeOrder());
-			ByteBuffer index = ByteBuffer.allocateDirect((entities.size() * 4) * 6).order(ByteOrder.nativeOrder());
 			
 			camera = (Objects.nonNull(Controller.globals.camera));
 			
@@ -291,18 +292,19 @@ public class BasicRenderer extends Renderer {
 			// Meshify each sprite
 			for(Entity e : entities) {
 				
-				TextureC t = (e.containsComponet("TextureC")) ? (TextureC) e.componets.get("TextureC") : null;
+				TextureC t = (Controller.scenes.ecs.contains(e, TextureC.class))
+						? (TextureC) Controller.scenes.ecs.get(e, TextureC.class) : null;
 				
-				int rawTextID = (Objects.nonNull(t)) ? t.texture.getRawID() : -1;
+				int rawTextID = (Objects.nonNull(t)) ? t.TextureID : -1;
 				
 				if(meshes.containsKey(rawTextID)) {
 					
-					meshes.get(rawTextID).addEntity(e);
+					meshes.get(rawTextID).addEntity(e, Controller.scenes.ecs);
 					
 				} else {
 					
-					meshes.put(rawTextID, new Meshes());
-					meshes.get(rawTextID).addEntity(e);
+					meshes.put(rawTextID, new Meshes(entities.size()));
+					meshes.get(rawTextID).addEntity(e, Controller.scenes.ecs);
 					
 				}
 				
@@ -316,7 +318,7 @@ public class BasicRenderer extends Renderer {
 				
 				if(key != -1) {
 					
-					textureRender(m, key, vertex, index);
+					textureRender(m, key);
 					
 				} else {
 					
@@ -325,6 +327,8 @@ public class BasicRenderer extends Renderer {
 				}
 				
 			}
+			
+			renderText();
 			
 			// End Rendering //
 			
@@ -365,6 +369,21 @@ public class BasicRenderer extends Renderer {
 	private float normal(int x, int div) {
 		
 		return ((float) x) / ((float) div / 2) -1f;
+	}
+
+	@Override
+	public void windowResized() {
+		
+		projection = new Matrix4f().ortho(
+				0f, (float) Controller.globals.screenSize.x,
+				(float) Controller.globals.screenSize.y, 0f,
+				-1f, 1f);
+		
+		FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
+		projection.get(projectionBuffer);
+		
+		GL30.glUniformMatrix4fv(GL30.glGetUniformLocation(textureShader, "projection"), false, projectionBuffer);
+		
 	}
 
 }

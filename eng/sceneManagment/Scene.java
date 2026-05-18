@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ecs.EntityManager;
+import graphical.rendering.fonts.Text;
 
 public abstract class Scene {
 	
 	// Personal Entity manager for the scene
 	public EntityManager entities = new EntityManager();
+	
+	// Text wanted to be drawn
+	public List<Text> text = new ArrayList<>();
 	
 	// List of current events
 	public List<Event> events = new ArrayList<>();

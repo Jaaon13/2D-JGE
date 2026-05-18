@@ -6,6 +6,8 @@ public class DebugController {
 	
 	public boolean fps = true;
 	
+	public long avgFps = 0;
+	
 	// Runs a debug command if a certain input is pressed
 	/*
 	 *  F10 is the atlas creator tool shortcut

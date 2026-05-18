@@ -1,13 +1,11 @@
 package controller;
 
 import java.awt.Point;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import assets.Texture;
 import graphical.componets.Camera;
-import graphical.componets.EngText;
 
 public class ControllerData {
 	

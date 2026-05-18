@@ -75,16 +75,16 @@ public class Logger {
 		
 		switch(info) {
 		case ERROR:
-			temp = "|ERROR| ";
+			temp = "|ERROR| Tick: " + Controller.globals.tick + " | ";
 			break;
 		case INFO:
-			temp = "|INFO| ";
+			temp = "|INFO| Tick: " + Controller.globals.tick + " | ";
 			break;
 		case WARNING:
-			temp = "|WARNING| ";
+			temp = "|WARNING| Tick: " + Controller.globals.tick + " | ";
 			break;
 		default:
-			temp = "|null| ";
+			temp = "|null| Tick: " + Controller.globals.tick + " | ";
 			break;
 		}
 		

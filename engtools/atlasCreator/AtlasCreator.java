@@ -14,9 +14,9 @@ import javax.swing.JFrame;
 import assets.Region;
 import assets.Texture;
 import controller.Controller;
+import ecs.EngineComponets.Pos;
+import ecs.Entity;
 import fileManager.SaveFile;
-import graphical.componets.ESprite;
-import graphical.componets.EngSprite;
 import graphical.userInput.AltKeys;
 import sceneManagment.Event;
 import sceneManagment.Event.type;
@@ -32,10 +32,10 @@ public class AtlasCreator extends Scene {
 	
 	String path = "";
 	
-	Texture highlight = (Texture) Controller.assets.load("\\engtools\\atlasCreator\\highlight.png");
+	String highlight = "\\engtools\\atlasCreator\\highlight.png";
 	Texture selected = null;
 	
-	EngSprite image;
+	Entity image;
 	
 	public void update() {
 		
@@ -46,20 +46,20 @@ public class AtlasCreator extends Scene {
 			findFile();
 				
 			path = selectedImagePath.getPath();
+			
+			System.out.println(path);
 				
 			selected = (Texture) Controller.assets.load(path);
 			
 			if(Objects.isNull(selected)) {return;}
 				
-			image = new EngSprite();
-			image.setPos(new Point(0, 0));
-			image.setSize(selected.size);
-			image.setTexture(selected);
-			image.getTexture().atlas = null;
+			image = new Entity(List.of(
+					Controller.componets.new Pos(defaultSizeX, defaultSizeY),
+					Controller.componets.new Size(selected.size.x, selected.size.y),
+					Controller.componets.new TextureC(path)
+					), entities);
 				
-			objects.addObject(image);
-				
-			Controller.globals.screenSize = selected.size;
+			Controller.graphics.setScreenSize(new Point(selected.size.x + defaultSizeX, selected.size.y + defaultSizeY));
 			
 		}
 		
@@ -75,7 +75,7 @@ public class AtlasCreator extends Scene {
 	
 	List<Region> regions = new ArrayList<>();
 	
-	final int defaultSizeX = 32, defaultSizeY = 32;
+	final int defaultSizeX = 16, defaultSizeY = 16;
  
 	private void gridSelection(Event e) {
 		
@@ -97,16 +97,16 @@ public class AtlasCreator extends Scene {
 		boolean exists = false;
 		
 		int x = (e.PointVal.x / defaultSizeX) * defaultSizeX;
-		int y = Controller.globals.screenSize.y - (((e.PointVal.y / defaultSizeY) * defaultSizeY) + defaultSizeY);
+		int y = ((e.PointVal.y / defaultSizeY) * defaultSizeY) + defaultSizeY;
 		
-		System.out.println(Controller.globals.screenSize);
-		
-		for(ESprite o : objects.getAll()) {
+		for(Entity en : entities.getVisible()) {
 			
-			if(o.getPos().x == x && o.getPos().y == y) {
-				
+			Pos pos = (Pos) entities.get(en, Pos.class);
+			
+			if(pos.x == x && pos.y == y) {
+			
 				exists = true;
-				objects.deleteObject(o);
+				entities.remove(en);
 				break;
 				
 			}
@@ -120,12 +120,11 @@ public class AtlasCreator extends Scene {
 		
 		if(!exists) {
 			
-			EngSprite a = new EngSprite();
-			a.setPos(new Point(x, y));
-			a.setSize(new Point(defaultSizeX, defaultSizeY));
-			a.setTexture(highlight);
-			
-			objects.addObject(a);
+			new Entity(List.of(
+					Controller.componets.new Pos(x, y),
+					Controller.componets.new Size(defaultSizeX, defaultSizeY),
+					Controller.componets.new TextureC(highlight)
+					), entities);
 			
 			grid.add(gridPos);
 			
@@ -150,10 +149,10 @@ public class AtlasCreator extends Scene {
 				
 			grid.clear();
 			
-			objects.clear();
+			entities.clear();
 			
 			if(Objects.nonNull(image)) {
-				objects.addObject(image);
+				entities.add(image);
 			}
 			
 			break;

@@ -8,6 +8,7 @@ import controller.Controller;
 import ecs.EngineComponets.Pos;
 import ecs.EngineComponets.Size;
 import ecs.Entity;
+import graphical.rendering.fonts.Text;
 import graphical.rendering.fonts.TextFactory;
 import graphical.rendering.fonts.TextFactory.Alignment;
 import sceneManagment.Event;
@@ -26,6 +27,18 @@ public class MainMenu extends Scene {
 	@Override
 	public void update() {
 		
+		if(Controller.debug.avgFps > 60) {
+			
+			for(int x = 0; x < 100; x++) {
+				new Entity(List.of(
+						Controller.componets.new Pos(-100, 100),
+						Controller.componets.new Size(300, 100),
+						Controller.componets.new TextureC("\\src\\textures\\Rectangle")
+						), entities);
+			}
+			
+		}
+		
 		for(Event e : events) {
 			
 			if(e.type == type.UI_MouseLClick && e.altType == type.UI_MousePress) {
@@ -38,16 +51,18 @@ public class MainMenu extends Scene {
 			
 		}
 		
+		this.text.getFirst().data = "Number of Entities: " + entities.getAll().size();
+		
 	}
 
 	private void checkIfCollied(Point click) {
 		
 		for(int x = 0; x < 4; x++) {
 			
-			Pos p = (Pos) buttons[x].componets.get("Pos");
-			Size s = (Size) buttons[x].componets.get("Size");
+			Pos p = (Pos) entities.get(buttons[x], Pos.class);
+			Size s = (Size) entities.get(buttons[x], Size.class);
 			
-			if( (click.x >= p.x && click.x <= p.x + s.x) && (click.y >= p.y - 100 && p.y + s.y - 100 >= click.y) ) {
+			if( (click.x >= p.x && click.x <= p.x + s.x) && (click.y >= p.y && p.y + s.y >= click.y) ) {
 				
 				switch(x) {
 				
@@ -80,6 +95,12 @@ public class MainMenu extends Scene {
 		
 		BoardGenerator.dPrintBoard(BoardGenerator.generateBoard(10, 40, 40));;
 		
+		new Entity(List.of(
+				Controller.componets.new Pos(100, 100),
+				Controller.componets.new Size(16, 16),
+				Controller.componets.new TextureC("\\src\\textures\\MS", "1")
+				), entities);
+		
 	}
 
 	private void mediumClick() {
@@ -100,62 +121,46 @@ public class MainMenu extends Scene {
 	@Override
 	public void switchedTo() {
 		
+		this.text.add(new Text("Number of Entities: " + entities.getVisible().size(), new Point(400, 0), Alignment.CENTER));
+		
 		entities.clear();
 		
 		buttons[0] = new Entity(List.of(
-				Controller.componets.new Pos(250, 200),
+				Controller.componets.new Pos(250, 100),
 				Controller.componets.new Size(300, 100),
 				Controller.componets.new TextureC("\\src\\textures\\Rectangle")
-				));
+				), entities);
 		
-		List<Entity> button1Text = TextFactory.generateText("Easy Mode", new Point(400, 160), Alignment.CENTER);
+		this.text.add(new Text("Easy Mode", new Point(400, 150 - 5), Alignment.CENTER));
 		
 		buttons[1] = new Entity(List.of(
-				Controller.componets.new Pos(250, 350),
+				Controller.componets.new Pos(250, 250),
 				Controller.componets.new Size(300, 100),
 				Controller.componets.new TextureC("\\src\\textures\\Rectangle")
-				));
+				), entities);
 		
-		List<Entity> button2Text = TextFactory.generateText("Intermediate Mode", new Point(400, 310), Alignment.CENTER);
+		this.text.add(new Text("Intermediate Mode", new Point(400, 300 - 5), Alignment.CENTER));
 		
 		buttons[2] = new Entity(List.of(
-				Controller.componets.new Pos(250, 500),
+				Controller.componets.new Pos(250, 400),
 				Controller.componets.new Size(300, 100),
 				Controller.componets.new TextureC("\\src\\textures\\Rectangle")
-				));
+				), entities);
 		
-		List<Entity> button3Text = TextFactory.generateText("Expert Mode", new Point(400, 460), Alignment.CENTER);
+		this.text.add(new Text("Expert Mode", new Point(400, 450 - 5), Alignment.CENTER));
 		
 		buttons[3] = new Entity(List.of(
-				Controller.componets.new Pos(250, 650),
+				Controller.componets.new Pos(250, 550),
 				Controller.componets.new Size(300, 100),
 				Controller.componets.new TextureC("\\src\\textures\\Rectangle")
-				));
+				), entities);
 		
-		List<Entity> button4Text = TextFactory.generateText("Custom Mode", new Point(400, 610), Alignment.CENTER);
+		this.text.add(new Text("Custom Mode", new Point(400, 600 - 5), Alignment.CENTER));
 		
-		entities.add(buttons[0]);
-		
-		for(Entity e : button1Text) {
-			entities.add(e);
-		}
-		
-		entities.add(buttons[1]);
-		
-		for(Entity e : button2Text) {
-			entities.add(e);
-		}
-		
-		entities.add(buttons[2]);
-		
-		for(Entity e : button3Text) {
-			entities.add(e);
-		}
-		
-		entities.add(buttons[3]);
-		
-		for(Entity e : button4Text) {
-			entities.add(e);
+		for(Entity e : buttons) {
+			
+			System.out.println(e.id);
+			
 		}
 		
 	}

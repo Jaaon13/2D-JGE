@@ -2,6 +2,7 @@ package controller;
 
 import java.awt.Point;
 import java.nio.DoubleBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.BufferUtils;
@@ -10,13 +11,16 @@ import org.lwjgl.glfw.GLFW;
 import defaultScene.EngineLoadingScene;
 import ecs.EngineComponets;
 import ecs.Entity;
-import graphical.componets.ESprite;
 import graphical.rendering.BasicRenderer;
+import graphical.rendering.fonts.Text;
 import logger.Logger;
 import logger.Logger.LoggerInfo;
 import utilities.FpsCounter;
 
 public class Controller {
+	
+	// Developer Mode
+	private static boolean devMode = true;
 	
 	// Controllers
 	public static final GraphicsController graphics = new GraphicsController();
@@ -38,13 +42,21 @@ public class Controller {
 	
 	public static volatile boolean running = true;
 	
+	@SuppressWarnings({ "unused" })
 	public static void engineLoop() {
+		
+		if (GLFW.glfwRawMouseMotionSupported())
+			GLFW.glfwSetInputMode(Controller.globals.window, GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_TRUE);
 		
 		// Call the controller closer if program quits
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {close();}));
 		
-		Controller.graphics.addTextOverlay("FPS", new Point(0, 10));
-		Controller.graphics.addTextOverlay("GPU", new Point(0, 20));
+		Controller.graphics.addTextOverlay("FPS", new Point(0, 0));
+		Controller.graphics.addTextOverlay("GPU", new Point(0, 10));
+		
+		if(devMode) {
+			Controller.graphics.addTextOverlay("MousePos", new Point(-100, -100));
+		}
 		
 		//render.setRenderer(render.addRenderer(new EngineRenderer()));
 		render.setRenderer(render.addRenderer(new BasicRenderer()));
@@ -61,13 +73,23 @@ public class Controller {
 			
 			globals.mousePos = new Point((int) xBuffer.get(0), (int) yBuffer.get(0));
 			
+			if(devMode) { // Outputs the mouse's current position
+				Controller.graphics.updateTextOverlay("MousePos", globals.mousePos.x + "." + globals.mousePos.y, new Point(globals.mousePos.x - 20, globals.mousePos.y - 10));
+			}
+			
 			FpsCounter.start();
 			
 			List<Entity> toDraw = scenes.execute();
 			
 			FpsCounter.sceneEnd();
 			
-			toDraw.addAll(graphics.getOverlays());
+			List<Text> text = new ArrayList<>();
+			
+			text.addAll(graphics.getOverlays());
+			
+			text.addAll(scenes.getText());
+			
+			render.setText(text);
 			
 			// Update
 			render.addEntities(toDraw);
@@ -96,6 +118,8 @@ public class Controller {
 		+ FpsCounter.fpsHigh + " FPS LOW " + FpsCounter.fpsLow;
 		
 		String fpsPer = "", gpuPer = "";
+		
+		Controller.debug.avgFps = FpsCounter.fpsAvg;
 		
 		char[] fpsp = ("" + FpsCounter.sceneUsagePercent).toCharArray(),
 				gpup = ("" + FpsCounter.rendererUsagePercent).toCharArray();
@@ -143,12 +167,14 @@ public class Controller {
 		
 		if(!hasClosed) {
 		
-			logger.log(List.of("Closing information", "Total Entities Generated: " + (assets.entityInc-1),
-					"Total Text Fields Generated: " + (assets.textInc-1), "Number of total ticks ran: " + Controller.globals.tick), LoggerInfo.INFO);
+			logger.log(List.of("Closing information", "Total Entities Generated: " + (assets.entityInc+1),
+					"Total Characters Generated: " + (assets.tempInc+1), "Number of total ticks ran: " + Controller.globals.tick), LoggerInfo.INFO);
 			
 			logger.close();
 			running = false;
 			hasClosed = true;
+			
+			GLFW.glfwTerminate();
 			
 		}
 		

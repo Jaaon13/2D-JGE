@@ -3,162 +3,120 @@ package ecs;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import controller.Controller;
 import ecs.EngineComponets.Pos;
-import ecs.EngineComponets.Size;
-import logger.Logger.LoggerInfo;
 
 public class EntityManager {
 	
-	private final int gridSize = 64;
+	private List<Entity> entities = new ArrayList<>();
 	
-	// Holds the entity ID's which one entity can encompass multiple squares
-	private Map<Point, List<Integer>> grid = new HashMap<>();
-
-	// Sorted by Entity ID to allow fast get and insertions
-	private Map<Integer, Entity> entities = new HashMap<>();
+	// Sorted by the class of the Componet, and indexed by the entity ID its associated with
+	private Map<Class<? extends Componet>, Map<Integer, Componet>> componets = new HashMap<>();
 	
-	// Entity must have a Pos and Size componet
 	public void add(Entity e) {
 		
-		entities.put(e.id, e);
-		
-		modifyEntityInGrid(e, ( () -> {
-			
-			Point p = new Point(gridX, gridY);
-			
-			if(!grid.containsKey(p)) {
-				grid.put(p, new ArrayList<>());
-			}
-			
-			grid.get(p).add(e.id);
-			
-		} ));
+		entities.add(e);
 		
 	}
 	
-	// Entity must have a Pos and Size componet
+	
+	
+	public void addComponet(int id, Componet c) {
+		
+		if(componets.get(c.getClass()) == null) {
+			componets.put(c.getClass(), new HashMap<>());
+		}
+		
+		componets.get(c.getClass()).put(id, c);
+		
+	}
+	
+	public Componet get(Entity e, Class<? extends Componet> c) {
+		return get(e.id, c);
+	}
+	
+	public Componet get(int id, Class<? extends Componet> c) {
+		
+		return componets.get(c).get(id);
+		
+	}
+	
 	public void remove(Entity e) {
 		
-		entities.remove(e.id, e);
+		entities.remove(e);
 		
-		modifyEntityInGrid(e, ( () -> {
+		for(Map<Integer, Componet> map : componets.values()) {
 			
-			Point p = new Point(gridX, gridY);
-			
-			if(!grid.containsKey(p)) {
-				grid.put(p, new ArrayList<>());
+			while(map.containsKey(e.id)) {
+				
+				map.remove(e.id);
+				
 			}
 			
-			grid.get(p).remove(e.id);
-			
-		} ));
+		}
+		
+	}
+	
+	public boolean contains(Entity e, List<Class<? extends Componet>> c) {
+		return contains(e.id, c);
+	}
+	
+	public boolean contains(int id, List<Class<? extends Componet>> c) {
+		
+		for(Class<? extends Componet> cl : c) {
+			if(!contains(id, cl)) {
+				return false;
+			}
+		}
+		
+		return true;
+		
+	}
+	
+	public boolean contains(Entity e, Class<? extends Componet> c) {
+		return contains(e.id, c);
+	}
+	
+	public boolean contains(int id, Class<? extends Componet> c) {
+		
+		return componets.get(c).containsKey(id);
 		
 	}
 	
 	public void clear() {
 		
 		entities.clear();
-		grid.clear();
-		
-	}
-	
-	public Entity get(int id) {
-		return entities.get(id);
-	}
-	
-	public List<Entity> getCell(Point p) {
-		
-		List<Integer> ids = grid.get(p);
-		
-		Set<Entity> re = new HashSet<>();
-		
-		for(int id : ids) {
-			
-			re.add(entities.get(id));
-			
-		}
-		
-		return setToList(re);
-		
+		componets.clear();
 		
 	}
 	
 	public List<Entity> getVisible() {
 		
-		Set<Entity> re = new HashSet<>();
+		List<Entity> visible = new ArrayList<>();
 		
-		Point topLeft = (Controller.globals.camera == null) ? new Point(0, 0) : new Point(Controller.globals.camera.pos);
-		Point screen = new Point(Controller.globals.screenSize);
+		Point s = Controller.globals.screenSize;
 		
-		for(int x = topLeft.x; x <= (screen.x / gridSize) + topLeft.x; x++) {
+		for(Entity e : entities) {
 			
-			for(int y = topLeft.y; y <= (screen.y / gridSize) + topLeft.y; y++) {
-				
-				List<Integer> ids = grid.get(new Point(x, y));
-				
-				if(ids == null) {continue;}
-				
-				for(int i : ids) {
-					re.add(entities.get(i));
-				}
-				
+			Pos p = (Pos) get(e, Pos.class);
+			
+			if( (p.x >= 0 && p.x <= s.x) && (p.y >= 0 && p.y <= s.y)) {
+				visible.add(e);
 			}
 			
 		}
 		
-		return setToList(re);
+		return visible;
 		
 	}
-	
-	private int gridX = 0, gridY= 0;
-	
-	private void modifyEntityInGrid(Entity e, Runnable run) {
-		
-		if(!e.containsComponet("Pos")) {
-			Controller.logger.log("Tried to modify an entity without a Position componet! ID: " + e.id, LoggerInfo.ERROR);
-			return;
-		} else if(!e.containsComponet("Size")) {
-			Controller.logger.log("Tried to modify an entity without a Size componet! ID: " + e.id, LoggerInfo.ERROR);
-			return;
-		}
-		
-		Pos pos = (Pos) e.componets.get("Pos");
-		Size size = (Size) e.componets.get("Size");
-		
-		Point topLeft = new Point(pos.x / gridSize, pos.y / gridSize);
-		Point bottomRight = new Point((pos.x + size.x) / gridSize, (pos.y + size.y) / gridSize);
-		
-		for(int x = topLeft.x; x <= bottomRight.x + topLeft.x; x++) {
-			
-			for(int y = topLeft.y; y <= bottomRight.y + topLeft.y; y++) {
-				
-				gridX = x;
-				gridY = y;
-				
-				run.run();
-				
-			}
-			
-		}
-		
-	}
-	
-	private <T> List<T> setToList(Set<T> set) {
-		
-		List<T> list = new ArrayList<>();
-		
-		for(T t : set) {
-			list.add(t);
-		}
-		
-		return list;
-		
+
+
+
+	public List<Entity> getAll() {
+		return entities;
 	}
 	
 }

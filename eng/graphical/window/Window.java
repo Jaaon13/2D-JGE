@@ -1,10 +1,13 @@
 package graphical.window;
 
 import java.awt.Point;
+import java.nio.IntBuffer;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL43;
+import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryUtil;
 
 import controller.Controller;
@@ -40,14 +43,21 @@ public class Window {
 		
 		GLFW.glfwSwapInterval(0);
 		
-		// Set up debug shit
-		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE);
-		
 		// Window Hints
 		GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
 		
+		boolean enableGLFWdebug = true;
+		
+		if(enableGLFWdebug) {
+			
+			// Set up debug shit
+			GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE);
+			
+		}
+		
 		if (GL.getCapabilities().glDebugMessageCallback != 0) {
-		    //GLUtil.setupDebugMessageCallback();
+		    GLUtil.setupDebugMessageCallback();
+		    GL43.glDebugMessageControl(GL43.GL_DONT_CARE, GL43.GL_DONT_CARE, GL43.GL_DEBUG_SEVERITY_NOTIFICATION, (IntBuffer)null, false);
 		}
 		
 		userInputInit();
@@ -70,6 +80,7 @@ public class Window {
 		
 						GL30.glViewport(0, 0, width, height);
 						Controller.globals.screenSize = new Point(width, height);
+						Controller.render.windowResized();
 		
 					});
 		

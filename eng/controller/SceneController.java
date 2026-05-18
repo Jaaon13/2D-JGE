@@ -1,13 +1,14 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ecs.Entity;
-import graphical.componets.ESprite;
-import graphical.componets.EText;
+import ecs.EntityManager;
+import graphical.rendering.fonts.Text;
 import logger.Logger.LoggerInfo;
 import sceneManagment.Event;
 import sceneManagment.Event.type;
@@ -29,6 +30,8 @@ public class SceneController {
 	private List<Event> events = new ArrayList<>();
 	
 	private boolean switchedTo = false;
+	
+	public EntityManager ecs;
 	
 	// Main loop for the scenes
 	// Also calculates FPS
@@ -95,10 +98,16 @@ public class SceneController {
 		
 		switchedTo = false;
 		
+		ecs = scenes.get(id).entities;
+		
 	}
 
 	public void addEvent(Event event) {
 		events.add(event);
+	}
+
+	public List<Text> getText() {
+		return scenes.get(curIndex).text;
 	}
 	
 }

@@ -2,17 +2,14 @@ package controller;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import org.lwjgl.glfw.GLFW;
+
 import assets.Atlas;
 import assets.Texture;
-import ecs.Entity;
-import graphical.componets.EText;
-import graphical.componets.EngText;
-import graphical.componets.Tags;
-import graphical.rendering.fonts.TextFactory;
+import graphical.rendering.fonts.Text;
 import graphical.rendering.fonts.TextFactory.Alignment;
 import graphical.window.Window;
 
@@ -60,25 +57,11 @@ public class GraphicsController {
 		
 	}
 	
-	private class overlayData {
-		
-		public Point pos;
-		public String data;
-		
-		public overlayData(Point p, String s) {
-			this.pos = p;
-			this.data = s;
-		}
-		
-	}
-	
-	private HashMap<String, overlayData> overlays = new HashMap<>();
-	
-	private final Point defaultTextSize = new Point(6, 10);
+	private HashMap<String, Text> overlays = new HashMap<>();
 	
 	public void addTextOverlay(String name, Point pos) {
 		
-		overlays.put(name, new overlayData(pos, ""));
+		overlays.put(name, new Text("", pos, Alignment.LEFT));
 		
 	}
 	
@@ -96,16 +79,23 @@ public class GraphicsController {
 		overlays.remove(name);
 	}
 	
-	public List<Entity> getOverlays() {
-		List<Entity> toreturn = new ArrayList<>();
+	public List<Text> getOverlays() {
 		
-		for(overlayData key : overlays.values()) {
-			
-			toreturn.addAll(TextFactory.generateText(key.data, key.pos, Alignment.LEFT));
-			
-		}
+		List<Text> tor = new ArrayList<>();
+		tor.addAll(overlays.values());
+		return tor;
+	}
+
+	public void setScreenSize(Point size) {
 		
-		return toreturn;
+		Controller.globals.screenSize = size;
+		GLFW.glfwSetWindowSize(Controller.globals.window, size.x, size.y);
+		
+	}
+
+	public void updateTextOverlay(String name, String data, Point newPos) {
+		overlays.get(name).data = data;
+		overlays.get(name).pos = newPos;
 	}
 	
 }

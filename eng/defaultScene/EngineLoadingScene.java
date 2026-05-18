@@ -3,8 +3,8 @@ package defaultScene;
 import java.awt.Point;
 
 import controller.Controller;
-import graphical.componets.ESprite;
-import graphical.componets.EngText;
+import graphical.rendering.fonts.Text;
+import graphical.rendering.fonts.TextFactory.Alignment;
 import sceneManagment.Scene;
 
 public class EngineLoadingScene extends Scene {
@@ -24,16 +24,7 @@ public class EngineLoadingScene extends Scene {
 	@Override
 	public void switchedTo() {
 		
-		EngText loadingText = new EngText("");
-		loadingText.setPos(new Point((int) (Controller.globals.screenSize.x * 0.45), (int) (Controller.globals.screenSize.y * 0.45)));
-		loadingText.setSize(new Point(6, 10));
-		loadingText.updateData("Loading...");
-		
-		for(ESprite s : loadingText.sprites) {
-			objects.addObject(s);
-		}
-		
-		System.out.println(loadingText.getPos());
+		text.add(new Text("Loading...", new Point(Controller.globals.screenSize.x / 2, Controller.globals.screenSize.y / 2), Alignment.CENTER));
 		
 	}
 

@@ -5,6 +5,7 @@ import java.awt.Point;
 import assets.Atlas;
 import assets.Texture;
 import controller.Controller;
+import logger.Logger.LoggerInfo;
 
 public class EngineComponets {
 
@@ -40,21 +41,6 @@ public class EngineComponets {
 		
 	}
 	
-	public class Text extends Componet {
-
-		@Override
-		public String getName() {
-			return "Text";
-		}
-		
-		public int textID;
-		
-		public Text() {
-			textID = Controller.assets.genTextID();
-		}
-		
-	}
-	
 	public class TextureC extends Componet {
 
 		@Override
@@ -77,8 +63,34 @@ public class EngineComponets {
 		
 		private void genTexture(String file, String atlas) {
 			
+			if(file.contains(".")) {
+				
+				String parsed = file.substring(file.indexOf(".") + 1);
+				
+				switch(parsed) {
+				
+				case "png":
+					this.texture = (Texture) Controller.assets.load(file);
+					break;
+					
+				case "atlas":
+					if(this.texture != null) {
+						this.texture.atlas = (Atlas) Controller.assets.load(file);
+					}
+				
+					default:
+						Controller.logger.log("Tried to generate a texture without a proper file ending : " + parsed, LoggerInfo.ERROR);
+						return;
+					
+				}
+				
+				return;
+				
+			}
+			
 			this.texture = (Texture) Controller.assets.load(file + ".png");
 			this.texture.atlas = (!atlas.isEmpty()) ? (Atlas) Controller.assets.load(file + ".atlas") : null;
+			this.TextureID = texture.getRawID();
 			
 			if(texture.atlas != null && !atlas.isEmpty()) {
 				

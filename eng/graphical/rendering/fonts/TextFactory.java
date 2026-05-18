@@ -1,12 +1,11 @@
 package graphical.rendering.fonts;
 
 import java.awt.Point;
-import java.util.ArrayList;
 import java.util.List;
 
 import controller.Controller;
-import ecs.EngineComponets.Text;
 import ecs.Entity;
+import ecs.EntityManager;
 
 public class TextFactory {
 
@@ -20,7 +19,7 @@ public class TextFactory {
 	
 	private static final Point defaultTextSize = new Point(6, 10);
 	
-	public static List<Entity> generateText(String data, Point pos, Alignment a) {
+	public static void generateText(String data, Point pos, Alignment a, EntityManager em, boolean isTemporary) {
 		
 		Point start;
 		
@@ -41,29 +40,23 @@ public class TextFactory {
 			break;
 			
 		default: // Edge case
-			return null;
+			return;
 		
 		}
 		
-		List<Entity> toreturn = new ArrayList<>();
-		
 		int offset = 0;
-		
-		Text text = Controller.componets.new Text();
 		
 		for(char s : data.toCharArray()) {
 			
-			Entity e = new Entity( 
-					List.of( Controller.componets.new Pos(start.x + offset, start.y), Controller.componets.new Size(defaultTextSize.x, defaultTextSize.y),
-					Controller.componets.new TextureC("\\eng\\graphical\\rendering\\fonts\\minogram_6x10", s + ""), text ));
-			
-			toreturn.add(e);
+			new Entity(List.of( 
+					Controller.componets.new Pos(start.x + offset, start.y), 
+					Controller.componets.new Size(defaultTextSize.x, defaultTextSize.y),
+					Controller.componets.new TextureC("\\eng\\graphical\\rendering\\fonts\\minogram_6x10", s + "")
+					), em, isTemporary);
 			
 			offset += defaultTextSize.x;
 			
 		}
-		
-		return toreturn;
 		
 	}
 	
