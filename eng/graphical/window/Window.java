@@ -17,6 +17,8 @@ public class Window {
 
 	public static void init(String title) throws Exception {
 		
+		//System.load("C:/Program Files/RenderDoc/renderdoc.dll");
+		
 		// Initalize GLFW and if failed throw an exception
 		if(!GLFW.glfwInit()) {
 			throw new Exception("Failed to intialize glfw!");
@@ -45,6 +47,11 @@ public class Window {
 		
 		// Window Hints
 		GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
+		
+		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE);
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
+		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
 		
 		boolean enableGLFWdebug = true;
 		

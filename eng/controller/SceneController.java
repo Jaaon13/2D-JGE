@@ -8,7 +8,7 @@ import java.util.Map;
 
 import ecs.Entity;
 import ecs.EntityManager;
-import graphical.rendering.fonts.Text;
+import gui.factorys.Text;
 import logger.Logger.LoggerInfo;
 import sceneManagment.Event;
 import sceneManagment.Event.type;
@@ -55,6 +55,7 @@ public class SceneController {
 		if(curIndex != -1 && scenes.containsKey(curIndex)) {
 			
 			scenes.get(curIndex).events = getAllEvents();
+			scenes.get(curIndex).entities.provokeListerners(events);
 			scenes.get(curIndex).update();
 			
 			events.removeAll(events);

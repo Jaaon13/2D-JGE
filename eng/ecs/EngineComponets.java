@@ -1,20 +1,17 @@
 package ecs;
 
 import java.awt.Point;
+import java.util.function.Function;
 
 import assets.Atlas;
 import assets.Texture;
 import controller.Controller;
 import logger.Logger.LoggerInfo;
+import sceneManagment.Event;
 
 public class EngineComponets {
 
-	public class Pos extends Componet {
-
-		@Override
-		public String getName() {
-			return "Pos";
-		}
+	public static class Pos extends Componet {
 
 		public int x, y;
 		
@@ -25,12 +22,7 @@ public class EngineComponets {
 		
 	}
 	
-	public class Size extends Componet {
-
-		@Override
-		public String getName() {
-			return "Size";
-		}
+	public static class Size extends Componet {
 
 		public int x, y;
 		
@@ -41,12 +33,87 @@ public class EngineComponets {
 		
 	}
 	
-	public class TextureC extends Componet {
-
-		@Override
-		public String getName() {
-			return "TextureC";
+	public static class Depth extends Componet {
+		
+		public enum Layer {
+			
+			GUI,
+			CENTER,
+			BACKGROUND
+			
 		}
+		
+		public int depth;
+		
+		public Depth(Layer l) {
+			
+			switch(l) {
+			
+			case BACKGROUND:
+				this.depth = Integer.MIN_VALUE;
+				break;
+				
+			case CENTER:
+				this.depth = 0;
+				break;
+				
+			case GUI:
+				this.depth = Integer.MAX_VALUE;
+				break;
+				
+			default:
+				this.depth = 0;
+				break;
+			
+			}
+			
+		}
+		
+		public Depth(int d) {
+			this.depth = d;
+		}
+		
+		public Depth() {
+			this.depth = 0;
+		}
+		
+	}
+	
+	public static class Listener extends Componet {
+		
+		private Event.type eventListener;
+		public Function<EventWrapper, Boolean> script;
+		
+		public static class EventWrapper {
+			
+			public Event e;
+			public int EntityId;
+			
+			// Read Only Please God
+			public final EntityManager em;
+			
+			public EventWrapper(Event e, int id, EntityManager em) {
+				this.e = e;
+				this.EntityId = id;
+				this.em = em;
+			}
+			
+		}
+		
+		public Listener(Event.type event, Function<EventWrapper, Boolean> f) {
+			
+			this.eventListener = event;
+			this.script = f;
+			
+		}
+		
+		public boolean check(Event event) {
+			return (eventListener == event.type);
+		}
+		
+	}
+	
+	public static class TextureC extends Componet {
 		
 		public Texture texture;
 		public Point atlas;
@@ -103,12 +170,8 @@ public class EngineComponets {
 	}
 	
 	
-	public class PlainShape extends Componet {
+	public static class PlainShape extends Componet {
 
-		@Override
-		public String getName() {
-			return "PlainShape";
-		}
 		
 		public enum Shape {
 			

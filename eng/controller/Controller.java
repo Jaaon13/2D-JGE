@@ -12,7 +12,8 @@ import defaultScene.EngineLoadingScene;
 import ecs.EngineComponets;
 import ecs.Entity;
 import graphical.rendering.BasicRenderer;
-import graphical.rendering.fonts.Text;
+import graphical.rendering.PainterRenderer;
+import gui.factorys.Text;
 import logger.Logger;
 import logger.Logger.LoggerInfo;
 import utilities.FpsCounter;
@@ -20,7 +21,7 @@ import utilities.FpsCounter;
 public class Controller {
 	
 	// Developer Mode
-	private static boolean devMode = true;
+	private static boolean devMode = false;
 	
 	// Controllers
 	public static final GraphicsController graphics = new GraphicsController();
@@ -58,8 +59,8 @@ public class Controller {
 			Controller.graphics.addTextOverlay("MousePos", new Point(-100, -100));
 		}
 		
-		//render.setRenderer(render.addRenderer(new EngineRenderer()));
-		render.setRenderer(render.addRenderer(new BasicRenderer()));
+		//render.setRenderer(render.addRenderer(new BasicRenderer()));
+		render.setRenderer(render.addRenderer(new PainterRenderer()));
 		
 		DoubleBuffer xBuffer = BufferUtils.createDoubleBuffer(1);
 		DoubleBuffer yBuffer = BufferUtils.createDoubleBuffer(1);
@@ -85,6 +86,7 @@ public class Controller {
 			
 			List<Text> text = new ArrayList<>();
 			
+			FpsCounter.startText();
 			text.addAll(graphics.getOverlays());
 			
 			text.addAll(scenes.getText());
@@ -92,6 +94,9 @@ public class Controller {
 			render.setText(text);
 			
 			// Update
+			
+			FpsCounter.startRender();
+			
 			render.addEntities(toDraw);
 			
 			render.render();
@@ -105,24 +110,19 @@ public class Controller {
 		close();
 		
 	}
-	
-	private static Runtime r = Runtime.getRuntime();
 
 	private static void updateEngineOverlays() {
-		
-		r.gc();
-		
-		long usedMem = r.totalMemory() - r.freeMemory();
 		
 		String fpsdata = "FPS AVG: " + FpsCounter.fpsAvg + " FPS HIGH: " 
 		+ FpsCounter.fpsHigh + " FPS LOW " + FpsCounter.fpsLow;
 		
-		String fpsPer = "", gpuPer = "";
+		String fpsPer = "", gpuPer = "", textPer = "";
 		
 		Controller.debug.avgFps = FpsCounter.fpsAvg;
 		
 		char[] fpsp = ("" + FpsCounter.sceneUsagePercent).toCharArray(),
-				gpup = ("" + FpsCounter.rendererUsagePercent).toCharArray();
+				gpup = ("" + FpsCounter.rendererUsagePercent).toCharArray(),
+				trend = ("" + FpsCounter.textUsagePercent).toCharArray();
 		
 		for(int x = 0; x < 6; x++) {
 			if(x < fpsp.length) {
@@ -135,12 +135,16 @@ public class Controller {
 			} else {
 				gpuPer += '0';
 			}
+			if(x < trend.length) {	
+				textPer += trend[x];
+			} else {
+				textPer += '0';
+			}
 			
 		}
 		
-		String gpudata = "NUM DRAW CALLS: " + render.getDrawCalls() + " NUM TRIANGLES: " + render.getTotalSpritesDrawn() + " MEM USE MB " 
-		+ (usedMem / (1024 * 1024)) + " SCENE USAGE: " + fpsPer 
-		+ "% RENDER USAGE: " + gpuPer + "%";
+		String gpudata = "NUM DRAW CALLS: " + render.getDrawCalls() + " NUM TRIANGLES: " + render.getTotalSpritesDrawn() + " SCENE USAGE: "
+		+ fpsPer + "% RENDER USAGE: " + gpuPer + "% TEXT RENDER USAGE: " + textPer + "%";
 		
 		if(graphics.overlayExists("FPS") && debug.fps) {
 			graphics.updateTextOverlay("FPS", fpsdata);

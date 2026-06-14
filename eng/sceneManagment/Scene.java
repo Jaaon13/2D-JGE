@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ecs.EntityManager;
-import graphical.rendering.fonts.Text;
+import gui.factorys.Text;
 
 public abstract class Scene {
 	

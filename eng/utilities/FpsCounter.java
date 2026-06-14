@@ -5,16 +5,44 @@ import java.util.Queue;
 
 public class FpsCounter {
 
-	private static long startTime, cpuEnd, gpuEnd;
+	private static long startTime, cpuEnd, textStart, textEnd, gpuStart, gpuEnd;
 	
 	public static long fpsAvg, fpsLow, fpsHigh;
 	
-	public static float sceneUsagePercent, sceneUsageMS, rendererUsagePercent, rendererUsageMS;
+	public static float sceneUsagePercent, sceneUsageMS, textUsagePercent, textUsageMS, rendererUsagePercent, rendererUsageMS;
 	
 	private static Queue<Long> fpsBuffer = new LinkedList<>();
 	
 	public static void start() {
 		startTime = System.nanoTime();
+	}
+	
+	public static void sceneEnd() {
+		
+		cpuEnd = System.nanoTime();
+		
+	}
+
+	public static void startText() {
+		
+		textStart = System.nanoTime();
+		
+	}
+
+	public static void startRender() {
+		
+		textEnd = System.nanoTime();
+		
+		gpuStart = System.nanoTime();
+		
+	}
+	
+	public static void rendererEnd() {
+		
+		gpuEnd = System.nanoTime();
+		
+		end();
+		
 	}
 	
 	// Returns fps average, 1% low, 1% high
@@ -55,27 +83,16 @@ public class FpsCounter {
 		fpsHigh = highFps;
 		
 		long sceneUsageNano = (cpuEnd - startTime);
-		long rendererUsageNano = (gpuEnd - (startTime + (cpuEnd - startTime)));
+		long textUsageNano = (textEnd - textStart);
+		long rendererUsageNano = (gpuEnd - gpuStart);
 		
 		sceneUsagePercent = ((float) sceneUsageNano / (float) timedif) * 100f;
+		textUsagePercent = ((float) textUsageNano / (float) timedif) * 100f;
 		rendererUsagePercent = ((float) rendererUsageNano / (float) timedif) * 100f;
 		
 		sceneUsageMS = (float) sceneUsageNano / 1000000f;
+		textUsageMS = (float) textUsageNano / 1000000f;
 		rendererUsageMS = (float) rendererUsageNano / 1000000f;
-		
-	}
-
-	public static void sceneEnd() {
-		
-		cpuEnd = System.nanoTime();
-		
-	}
-
-	public static void rendererEnd() {
-		
-		gpuEnd = System.nanoTime();
-		
-		end();
 		
 	}
 	

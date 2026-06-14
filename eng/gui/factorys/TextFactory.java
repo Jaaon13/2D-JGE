@@ -1,9 +1,10 @@
-package graphical.rendering.fonts;
+package gui.factorys;
 
 import java.awt.Point;
 import java.util.List;
 
-import controller.Controller;
+import ecs.EngineComponets.*;
+import ecs.EngineComponets.Depth.Layer;
 import ecs.Entity;
 import ecs.EntityManager;
 
@@ -20,6 +21,18 @@ public class TextFactory {
 	private static final Point defaultTextSize = new Point(6, 10);
 	
 	public static void generateText(String data, Point pos, Alignment a, EntityManager em, boolean isTemporary) {
+		
+		genText(data, pos, Integer.MAX_VALUE, a, em, isTemporary);
+		
+	}
+	
+	public static void generateText(String data, Point pos, int depth, Alignment a, EntityManager em, boolean isTemporary) {
+		
+		genText(data, pos, depth, a, em, isTemporary);
+		
+	}
+	
+	private static void genText(String data, Point pos, int depth, Alignment a, EntityManager em, boolean isTemporary) {
 		
 		Point start;
 		
@@ -49,9 +62,10 @@ public class TextFactory {
 		for(char s : data.toCharArray()) {
 			
 			new Entity(List.of( 
-					Controller.componets.new Pos(start.x + offset, start.y), 
-					Controller.componets.new Size(defaultTextSize.x, defaultTextSize.y),
-					Controller.componets.new TextureC("\\eng\\graphical\\rendering\\fonts\\minogram_6x10", s + "")
+					new Pos(start.x + offset, start.y), 
+					new Size(defaultTextSize.x, defaultTextSize.y),
+					new TextureC("\\eng\\graphical\\rendering\\fonts\\minogram_6x10", s + ""),
+					new Depth(Layer.GUI)
 					), em, isTemporary);
 			
 			offset += defaultTextSize.x;

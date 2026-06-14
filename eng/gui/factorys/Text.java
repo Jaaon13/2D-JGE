@@ -1,8 +1,8 @@
-package graphical.rendering.fonts;
+package gui.factorys;
 
 import java.awt.Point;
 
-import graphical.rendering.fonts.TextFactory.Alignment;
+import gui.factorys.TextFactory.Alignment;
 
 public class Text {
 	

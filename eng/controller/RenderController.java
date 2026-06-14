@@ -6,7 +6,7 @@ import java.util.Map;
 
 import ecs.Entity;
 import graphical.rendering.Renderer;
-import graphical.rendering.fonts.Text;
+import gui.factorys.Text;
 import logger.Logger.LoggerInfo;
 
 public class RenderController {

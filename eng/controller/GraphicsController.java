@@ -9,9 +9,9 @@ import org.lwjgl.glfw.GLFW;
 
 import assets.Atlas;
 import assets.Texture;
-import graphical.rendering.fonts.Text;
-import graphical.rendering.fonts.TextFactory.Alignment;
 import graphical.window.Window;
+import gui.factorys.Text;
+import gui.factorys.TextFactory.Alignment;
 
 public class GraphicsController {
 

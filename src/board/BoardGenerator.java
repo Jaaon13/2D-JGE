@@ -34,6 +34,20 @@ public class BoardGenerator {
 			
 			board[y][x] = 1;
 			
+			for(int x2 = -1; x2 < 2; x2++) {
+				
+				for(int y2 = -1; y2 < 2; y2++) {
+					
+					if((x + x2 >= 40 ||  x + x2 < 0) || (y + y2 >= 10 || y + y2 < 0)) {
+						
+					} else {
+						board[y + y2][x + x2] = (board[y + y2][x + x2] != 1) ? board[y + y2][x + x2] + 10 : board[y + y2][x + x2];
+					}
+					
+				}
+				
+			}
+			
 		}
 		
 		return board;

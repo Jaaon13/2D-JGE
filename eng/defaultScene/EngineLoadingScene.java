@@ -3,8 +3,8 @@ package defaultScene;
 import java.awt.Point;
 
 import controller.Controller;
-import graphical.rendering.fonts.Text;
-import graphical.rendering.fonts.TextFactory.Alignment;
+import gui.factorys.Text;
+import gui.factorys.TextFactory.Alignment;
 import sceneManagment.Scene;
 
 public class EngineLoadingScene extends Scene {

@@ -7,7 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import controller.Controller;
+import ecs.EngineComponets.Listener;
+import ecs.EngineComponets.Listener.EventWrapper;
+import logger.Logger.LoggerInfo;
 import ecs.EngineComponets.Pos;
+import sceneManagment.Event;
 
 public class EntityManager {
 	
@@ -34,8 +38,16 @@ public class EntityManager {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	public Componet get(Entity e, Class<? extends Componet> c) {
-		return get(e.id, c);
+		try {
+			return get(e.id, c);
+		} catch(NullPointerException err) {
+			if(false) { // Will overflow the logging!
+				Controller.logger.log(List.of("Tried to get a componet that does not exist!", "Entity ID: " + e.id), LoggerInfo.WARNING);
+			}
+			return null;
+		}
 	}
 	
 	public Componet get(int id, Class<? extends Componet> c) {
@@ -44,6 +56,41 @@ public class EntityManager {
 		
 	}
 	
+	public List<Componet> getAllComponets(Entity e) {
+		return getallcmp(e.id);
+	}
+	
+	public List<Componet> getAllComponets(int id) {
+		return getallcmp(id);
+	}
+	
+	private List<Componet> getallcmp(int id) {
+		
+		List<Componet> cmpts = new ArrayList<>();
+		
+		for(Class<? extends Componet> c : componets.keySet()) {
+			
+			Componet comp;
+			
+			try {
+				comp = componets.get(c).get(id);
+			} catch(Exception e) {
+				comp = null;
+			}
+			
+			if(comp != null) {
+				
+				cmpts.add(comp);
+				
+			}
+			
+		}
+		
+		return cmpts;
+	}
+
+
+
 	public void remove(Entity e) {
 		
 		entities.remove(e);
@@ -117,6 +164,34 @@ public class EntityManager {
 
 	public List<Entity> getAll() {
 		return entities;
+	}
+
+
+
+	public void provokeListerners(List<Event> events) {
+		
+		Map<Integer, Componet> listeners = componets.get(Listener.class);
+		
+		if(listeners == null) {return;}
+		
+		for(int key : listeners.keySet()) {
+			
+			Listener l = (Listener) listeners.get(key);
+			
+			for(Event e : events) {
+				
+				if(l.check(e)) {
+					
+					l.script.apply(new EventWrapper(e, key, this));
+					
+					break;
+					
+				}
+				
+			}
+			
+		}
+		
 	}
 	
 }

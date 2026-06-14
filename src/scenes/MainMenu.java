@@ -5,15 +5,17 @@ import java.util.List;
 
 import board.BoardGenerator;
 import controller.Controller;
+import ecs.EngineComponets.Depth;
 import ecs.EngineComponets.Pos;
 import ecs.EngineComponets.Size;
+import ecs.EngineComponets.TextureC;
+import graphical.rendering.PainterRenderer;
 import ecs.Entity;
-import graphical.rendering.fonts.Text;
-import graphical.rendering.fonts.TextFactory;
-import graphical.rendering.fonts.TextFactory.Alignment;
+import gui.factorys.Text;
+import gui.factorys.TextFactory.Alignment;
 import sceneManagment.Event;
-import sceneManagment.Scene;
 import sceneManagment.Event.type;
+import sceneManagment.Scene;
 
 public class MainMenu extends Scene {
 
@@ -26,18 +28,6 @@ public class MainMenu extends Scene {
 	
 	@Override
 	public void update() {
-		
-		if(Controller.debug.avgFps > 60) {
-			
-			for(int x = 0; x < 100; x++) {
-				new Entity(List.of(
-						Controller.componets.new Pos(-100, 100),
-						Controller.componets.new Size(300, 100),
-						Controller.componets.new TextureC("\\src\\textures\\Rectangle")
-						), entities);
-			}
-			
-		}
 		
 		for(Event e : events) {
 			
@@ -93,18 +83,18 @@ public class MainMenu extends Scene {
 	private void easyClick() {
 		System.out.println("easy clicked");
 		
-		BoardGenerator.dPrintBoard(BoardGenerator.generateBoard(10, 40, 40));;
+		int[][] bombs = BoardGenerator.generateBoard(10, 40, 40);
 		
-		new Entity(List.of(
-				Controller.componets.new Pos(100, 100),
-				Controller.componets.new Size(16, 16),
-				Controller.componets.new TextureC("\\src\\textures\\MS", "1")
-				), entities);
+		Game newGame = new Game(bombs, 40);
+		
+		int newGameId = Controller.scenes.addScene(newGame);
+		Controller.scenes.setScene(newGameId);
 		
 	}
 
 	private void mediumClick() {
-		System.out.println("medium clicked");
+		
+		Controller.scenes.setScene(Controller.scenes.addScene(new buttontest()));
 		
 	}
 
@@ -126,42 +116,36 @@ public class MainMenu extends Scene {
 		entities.clear();
 		
 		buttons[0] = new Entity(List.of(
-				Controller.componets.new Pos(250, 100),
-				Controller.componets.new Size(300, 100),
-				Controller.componets.new TextureC("\\src\\textures\\Rectangle")
+				new Pos(250, 100),
+				new Size(300, 100),
+				new TextureC("\\src\\textures\\Rectangle")
 				), entities);
 		
 		this.text.add(new Text("Easy Mode", new Point(400, 150 - 5), Alignment.CENTER));
 		
 		buttons[1] = new Entity(List.of(
-				Controller.componets.new Pos(250, 250),
-				Controller.componets.new Size(300, 100),
-				Controller.componets.new TextureC("\\src\\textures\\Rectangle")
+				new Pos(250, 250),
+				new Size(300, 100),
+				new TextureC("\\src\\textures\\Rectangle")
 				), entities);
 		
 		this.text.add(new Text("Intermediate Mode", new Point(400, 300 - 5), Alignment.CENTER));
 		
 		buttons[2] = new Entity(List.of(
-				Controller.componets.new Pos(250, 400),
-				Controller.componets.new Size(300, 100),
-				Controller.componets.new TextureC("\\src\\textures\\Rectangle")
+				new Pos(250, 400),
+				new Size(300, 100),
+				new TextureC("\\src\\textures\\Rectangle")
 				), entities);
 		
 		this.text.add(new Text("Expert Mode", new Point(400, 450 - 5), Alignment.CENTER));
 		
 		buttons[3] = new Entity(List.of(
-				Controller.componets.new Pos(250, 550),
-				Controller.componets.new Size(300, 100),
-				Controller.componets.new TextureC("\\src\\textures\\Rectangle")
+				new Pos(250, 550),
+				new Size(300, 100),
+				new TextureC("\\src\\textures\\Rectangle")
 				), entities);
 		
 		this.text.add(new Text("Custom Mode", new Point(400, 600 - 5), Alignment.CENTER));
-		
-		for(Entity e : buttons) {
-			
-			System.out.println(e.id);
-			
-		}
 		
 	}
 

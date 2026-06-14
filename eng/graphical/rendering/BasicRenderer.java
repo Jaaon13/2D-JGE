@@ -19,10 +19,10 @@ import ecs.EngineComponets.PlainShape;
 import ecs.EngineComponets.Pos;
 import ecs.EngineComponets.Size;
 import ecs.EngineComponets.TextureC;
+import gui.factorys.Text;
+import gui.factorys.TextFactory;
 import ecs.Entity;
 import ecs.EntityManager;
-import graphical.rendering.fonts.Text;
-import graphical.rendering.fonts.TextFactory;
 import logger.Logger.LoggerInfo;
 
 public class BasicRenderer extends Renderer {
@@ -118,7 +118,7 @@ public class BasicRenderer extends Renderer {
 			boolean usesAtlas = (em.contains(e, TextureC.class))
 					? ((((TextureC) em.get(e, TextureC.class)).atlas != null) ? true : false) : false;
 			
-			TextureC t = (usesAtlas) ? (TextureC) em.get(e, TextureC.class) : null;
+			TextureC t = (TextureC) em.get(e, TextureC.class);
 			
 			Point newPos = (Controller.globals.camera != null) ? 
 					new Point(posComp.x - Controller.globals.camera.pos.x, (posComp.y - Controller.globals.camera.pos.y)):
@@ -364,11 +364,6 @@ public class BasicRenderer extends Renderer {
 		
 		return(short)((( v >>16 ) & 0x8000 ) | (((( v & 0x7f800000 ) - 0x38000000 )>>13 ) & 0x7c00 ) | (( v >>13 ) & 0x03ff ));
 		
-	}
-	
-	private float normal(int x, int div) {
-		
-		return ((float) x) / ((float) div / 2) -1f;
 	}
 
 	@Override

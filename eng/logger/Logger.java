@@ -14,8 +14,6 @@ import controller.Controller;
 
 public class Logger {
 	
-	// #TODO: Add severity level to logged information
-	
 	private FileWriter file;
 	
 	private String path;
