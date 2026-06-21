@@ -5,14 +5,17 @@ import java.util.List;
 import java.util.function.Function;
 
 import ecs.EngineComponets.Depth;
+import ecs.EngineComponets.Depth.Layer;
 import ecs.EngineComponets.Listener;
 import ecs.EngineComponets.Listener.EventWrapper;
 import ecs.EngineComponets.PlainShape;
 import ecs.EngineComponets.PlainShape.Shape;
 import ecs.EngineComponets.Pos;
 import ecs.EngineComponets.Size;
+import ecs.EngineComponets.TextureC;
 import ecs.Entity;
 import ecs.EntityManager;
+import gui.factorys.TextFactory.Alignment;
 import sceneManagment.Event;
 import sceneManagment.Event.type;
 
@@ -54,27 +57,7 @@ public class ButtonFactory {
 	private static void createf(String data, TextFactory.Alignment a, Point pos, Point size, int depth, 
 			Runnable r, Event.type event, EntityManager em) {
 		
-		Function<EventWrapper, Boolean> func = (EventWrapper wrapper) -> {
-			
-			if(wrapper.e.altType != type.UI_MousePress) {
-				return false;
-			}
-			
-			Pos pos2 = (Pos) wrapper.em.get(wrapper.EntityId, Pos.class);
-			Size size2 = (Size) wrapper.em.get(wrapper.EntityId, Size.class);
-			
-			Point click = wrapper.e.PointVal;
-			
-			if((pos2.x < click.x && click.x < pos2.x + size2.x) && (pos2.y < click.y && click.y < pos2.y + size2.y)) {
-				
-				r.run();
-				
-			}
-			
-			return true;
-		};
-		
-		create(data, a, pos, size, depth, func, event, em);
+		create(data, a, pos, size, depth, makeFunction(r), event, em);
 		
 	}
 	
@@ -90,7 +73,50 @@ public class ButtonFactory {
 				new PlainShape(255, 255, 255, Shape.RECTANGLE)
 				), em);
 		
-		TextFactory.generateText(data, pos, depth, a, em, false);
+		TextFactory.generateText(data, new Point(pos.x + (size.x / 2), pos.y + (size.y / 2)), depth, a, em, false);
+		
+	}
+	
+	public static void createButton(String data, Point pos, Point size, int depth, String texture,
+			Runnable r, EntityManager em) {
+		
+		new Entity(List.of(
+				new Pos(pos.x, pos.y),
+				new Size(size.x, size.y),
+				new Depth(depth),
+				new Listener(type.UI_MouseLClick, makeFunction(r)),
+				new TextureC(texture)
+				), em);
+		
+		TextFactory.generateText(data, new Point(pos.x + (size.x / 2), pos.y + (size.y / 2)), TextFactory.Alignment.CENTER, em, false);
+		
+	}
+	
+	private static Function<EventWrapper, Boolean> makeFunction(Runnable r) {
+		
+		return (EventWrapper wrapper) -> {
+			
+			if(wrapper.e.altType != type.UI_MousePress) {
+				return false;
+			}
+			
+			Pos pos2 = (Pos) wrapper.em.get(wrapper.EntityId, Pos.class);
+			Size size2 = (Size) wrapper.em.get(wrapper.EntityId, Size.class);
+			
+			Point click = wrapper.e.PointVal;
+			
+			if(pos2 == null) {
+				return false;
+			}
+			
+			if((pos2.x < click.x && click.x < pos2.x + size2.x) && (pos2.y < click.y && click.y < pos2.y + size2.y)) {
+				
+				r.run();
+				
+			}
+			
+			return true;
+		};
 		
 	}
 

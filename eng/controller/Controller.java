@@ -43,6 +43,16 @@ public class Controller {
 	
 	public static volatile boolean running = true;
 	
+	public static void createFPS() {
+		Controller.graphics.addTextOverlay("FPS", new Point(0, 0));
+		Controller.graphics.addTextOverlay("GPU", new Point(0, 10));
+	}
+	
+	public static void removeFPS() {
+		Controller.graphics.removeTextOverlay("FPS");
+		Controller.graphics.removeTextOverlay("GPU");
+	}
+	
 	@SuppressWarnings({ "unused" })
 	public static void engineLoop() {
 		
@@ -51,9 +61,6 @@ public class Controller {
 		
 		// Call the controller closer if program quits
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {close();}));
-		
-		Controller.graphics.addTextOverlay("FPS", new Point(0, 0));
-		Controller.graphics.addTextOverlay("GPU", new Point(0, 10));
 		
 		if(devMode) {
 			Controller.graphics.addTextOverlay("MousePos", new Point(-100, -100));
@@ -102,7 +109,7 @@ public class Controller {
 			render.render();
 			
 			FpsCounter.rendererEnd();
-			
+
 			updateEngineOverlays();
 			
 		}
@@ -112,6 +119,8 @@ public class Controller {
 	}
 
 	private static void updateEngineOverlays() {
+		
+		if(!debug.fps) {return;}
 		
 		String fpsdata = "FPS AVG: " + FpsCounter.fpsAvg + " FPS HIGH: " 
 		+ FpsCounter.fpsHigh + " FPS LOW " + FpsCounter.fpsLow;

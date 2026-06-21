@@ -4,7 +4,7 @@ import graphical.userInput.AltKeys;
 
 public class DebugController {
 	
-	public boolean fps = true;
+	public boolean fps = false;
 	
 	public long avgFps = 0;
 	
@@ -17,11 +17,18 @@ public class DebugController {
 		switch(key) {
 		
 		case AltKeys.F1:
-			fps = true;
+			fps = !fps;
+			
+			if(fps) {
+				Controller.createFPS();
+			} else {
+				Controller.removeFPS();
+			}
+			
 			return true;
 			
 		case AltKeys.F10:
-				
+			
 			int id = Controller.scenes.addScene(new atlasCreator.AtlasCreator());
 			
 			Controller.scenes.setScene(id);

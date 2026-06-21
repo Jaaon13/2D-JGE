@@ -89,6 +89,20 @@ public class EntityManager {
 		return cmpts;
 	}
 
+	public <T> void update(Entity e, Class<? extends Componet> c, T t) {
+		update(e.id, c, t);
+	}
+
+	public <T> void update(int id, Class<? extends Componet> c, T t) {
+		Componet comp = get(id, c);
+		if(comp == null) {
+			Controller.logger.log(List.of("Failed to update entity with id: " + id,
+					"Tried to update: " + c + " componet and it did not exist"), LoggerInfo.WARNING);
+			return;
+		}
+		comp.update(t);
+	}
+
 
 
 	public void remove(Entity e) {
@@ -100,6 +114,21 @@ public class EntityManager {
 			while(map.containsKey(e.id)) {
 				
 				map.remove(e.id);
+				
+			}
+			
+		}
+		
+	}
+	
+	public void remove(int id) {
+		
+		for(Entity e : entities) {
+			
+			if(e.id == id) {
+				
+				remove(e);
+				return;
 				
 			}
 			
@@ -172,7 +201,7 @@ public class EntityManager {
 		
 		Map<Integer, Componet> listeners = componets.get(Listener.class);
 		
-		if(listeners == null) {return;}
+		if(listeners == null || listeners.isEmpty()) {return;}
 		
 		for(int key : listeners.keySet()) {
 			

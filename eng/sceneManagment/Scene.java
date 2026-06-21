@@ -8,6 +8,8 @@ import gui.factorys.Text;
 
 public abstract class Scene {
 	
+	public int id;
+	
 	// Personal Entity manager for the scene
 	public EntityManager entities = new EntityManager();
 	

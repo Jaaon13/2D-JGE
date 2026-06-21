@@ -1,6 +1,7 @@
 package ecs;
 
 import java.awt.Point;
+import java.util.List;
 import java.util.function.Function;
 
 import assets.Atlas;
@@ -10,6 +11,11 @@ import logger.Logger.LoggerInfo;
 import sceneManagment.Event;
 
 public class EngineComponets {
+	
+	private static <T> void updateErr(T t, Class<? extends Componet> c) {
+		Controller.logger.log(List.of("Tried to use an invalid type to update a " + c + " component!",
+				"Generic class: " + t.getClass()), LoggerInfo.WARNING);
+	}
 
 	public static class Pos extends Componet {
 
@@ -18,6 +24,23 @@ public class EngineComponets {
 		public Pos(int x, int y) {
 			this.x = x;
 			this.y = y;
+		}
+
+		@Override
+		protected <T> void update(T t) {
+			if(t instanceof Point) {
+				
+				this.x = ((Point) t).x;
+				this.y = ((Point) t).y;
+				
+			} else if(t instanceof Pos) {
+				
+				this.x = ((Pos) t).x;
+				this.y = ((Pos) t).y;
+				
+			} else {
+				updateErr(t, Pos.class);
+			}
 		}
 		
 	}
@@ -29,6 +52,23 @@ public class EngineComponets {
 		public Size(int x, int y) {
 			this.x = x;
 			this.y = y;
+		}
+
+		@Override
+		protected <T> void update(T t) {
+			if(t instanceof Point) {
+				
+				this.x = ((Point) t).x;
+				this.y = ((Point) t).y;
+				
+			} else if(t instanceof Size) {
+				
+				this.x = ((Size) t).x;
+				this.y = ((Size) t).y;
+				
+			} else {
+				updateErr(t, Size.class);
+			}
 		}
 		
 	}
@@ -76,6 +116,15 @@ public class EngineComponets {
 		public Depth() {
 			this.depth = 0;
 		}
+
+		@Override
+		protected <T> void update(T t) {
+			if(t instanceof Integer) {
+				this.depth = (int) t;
+			} else {
+				updateErr(t, Size.class);
+			}
+		}
 		
 	}
 	
@@ -109,6 +158,11 @@ public class EngineComponets {
 		
 		public boolean check(Event event) {
 			return (eventListener == event.type);
+		}
+
+		@Override
+		protected <T> void update(T t) {
+			updateErr(t, Listener.class);
 		}
 		
 	}
@@ -166,6 +220,17 @@ public class EngineComponets {
 			}
 			
 		}
+
+		@Override
+		protected <T> void update(T t) {
+			if(t instanceof TextureC) {
+				this.texture = ((TextureC) t).texture;
+				this.atlas = ((TextureC) t).atlas;
+				this.TextureID = ((TextureC) t).TextureID;
+			} else {
+				updateErr(t, TextureC.class);
+			}
+		}
 		
 	}
 	
@@ -190,6 +255,11 @@ public class EngineComponets {
 			this.color[2] = b;
 			
 			this.shape = s;
+		}
+
+		@Override
+		protected <T> void update(T t) {
+			updateErr(t, PlainShape.class);
 		}
 		
 	}

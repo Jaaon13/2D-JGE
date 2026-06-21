@@ -96,9 +96,7 @@ public class PainterRenderer extends Renderer {
 	
 	private abstract class Mesh {
 		
-		@SuppressWarnings("unused")
 		protected short[] vertexes;
-		@SuppressWarnings("unused")
 		protected int[] indexes;
 		
 		public abstract short[] getVertexes();
@@ -289,33 +287,15 @@ public class PainterRenderer extends Renderer {
 		
 		int[] keylist = getKeyList(sortEntities(layers, ecs));
 		
-		layers.put(textLayer, List.of(new RenderWrapper(textID, new TextureMesh(textEcs.getVisible(), textEcs))));
+		if(!layers.containsKey(textLayer)) {
+			layers.put(textLayer, List.of(new RenderWrapper(textID, new TextureMesh(textEcs.getVisible(), textEcs))));
+		} else {
+			layers.get(textLayer).add(new RenderWrapper(textID, new TextureMesh(textEcs.getVisible(), textEcs)));
+		}
 		
 		for(int i = 0; i < keylist.length; i++) {
 			
-			String s;
-			
 			int key = keylist[i];
-			
-			switch(key) {
-			
-			case Integer.MIN_VALUE:
-				s = "Background | " + key;
-				break;
-				
-			case Integer.MAX_VALUE:
-				s = "GUI | " + key;
-				break;
-				
-			case 0:
-				s = "Center | " + key;
-				break;
-				
-			default:
-				s = "" + key;
-				break;
-			
-			}
 			
 			for(RenderWrapper r : layers.get(key)) {
 				

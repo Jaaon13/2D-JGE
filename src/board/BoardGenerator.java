@@ -6,12 +6,10 @@ import controller.Controller;
 import logger.Logger.LoggerInfo;
 
 public class BoardGenerator {
-
-	public static long seed = 0;
 	
 	public static int[][] generateBoard(int height, int width, int bombs) {
 		
-		Random rand = new Random(seed);
+		Random rand = new Random();
 		
 		int[][] board = new int[height][width];
 		
@@ -38,7 +36,7 @@ public class BoardGenerator {
 				
 				for(int y2 = -1; y2 < 2; y2++) {
 					
-					if((x + x2 >= 40 ||  x + x2 < 0) || (y + y2 >= 10 || y + y2 < 0)) {
+					if((x + x2 >= width ||  x + x2 < 0) || (y + y2 >= height || y + y2 < 0)) {
 						
 					} else {
 						board[y + y2][x + x2] = (board[y + y2][x + x2] != 1) ? board[y + y2][x + x2] + 10 : board[y + y2][x + x2];

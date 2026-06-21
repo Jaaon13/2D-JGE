@@ -85,6 +85,7 @@ public class SceneController {
 		
 		index++;
 		scenes.put(index, s);
+		s.id = index;
 		
 		return index;
 		
