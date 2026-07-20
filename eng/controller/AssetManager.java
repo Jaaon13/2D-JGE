@@ -31,11 +31,11 @@ public class AssetManager {
 		SHADER_TID = 1, 
 		ATLAS_TID = 2,
 		ENTITY_TID = 3,
-		TEMPORARY_TID = 4; // Will overflow not meant to be a permanent id, expect it to be lost after current frame // Used primarily for text
+		TEMPORARY_TID = 4; // Will overflow not meant to be a permanent id, expect it to be lost after current frame; Used primarily for text
 	
 	private Set<Asset> assets = new HashSet<>();
 	
-	private int BYTE3LIMIT = 16777216;
+	private final int BYTE3LIMIT = 16777216;
 	
 	protected int entityInc = -1;
 	
@@ -108,12 +108,13 @@ public class AssetManager {
 	}
 	
 	// Get asset based on id and file type
-	public Asset get(int inID) {
+	@SuppressWarnings("unchecked")
+	public <T extends Asset> T get(int inID) {
 		
 		for(Asset a : assets) {
 			
 			if(a.id == inID) {
-				return a;
+				return (T) a;
 			}
 			
 		}
@@ -122,12 +123,13 @@ public class AssetManager {
 	}
 	
 	// Get Asset using just the file location !cannot use for programs!
-	public Asset get(String filePath) {
+	@SuppressWarnings("unchecked")
+	public <T extends Asset> T get(String filePath) {
 		
 		for(Asset i : assets) {
 			
 			if(i.filePath.equals(filePath)) {
-				return i;
+				return (T) i;
 			}
 			
 		}
@@ -137,7 +139,8 @@ public class AssetManager {
 	}
 	
 	// Takes file path w/o the directory
-	public Asset load(String filePath) {
+	@SuppressWarnings("unchecked")
+	public <T extends Asset> T load(String filePath) {
 		
 		Asset a;
 		
@@ -148,7 +151,7 @@ public class AssetManager {
 		}
 		
 		if(Objects.nonNull(a)) {
-			return a;
+			return (T) a;
 		}
 		
 		Controller.logger.log("Asset Loading: " + filePath, LoggerInfo.INFO);
@@ -165,12 +168,13 @@ public class AssetManager {
 			assets.add(a);
 		}
 		
-		return a;
+		return (T) a;
 		
 	}
 	
 	// Used to load a shader specifically
-	public Asset load(String fp1, String fp2) {
+	@SuppressWarnings("unchecked")
+	public <T extends Asset> T load(String fp1, String fp2) {
 		
 		Asset a = null;
 		
@@ -189,7 +193,7 @@ public class AssetManager {
 			assets.add(a);
 		}
 		
-		return a;
+		return (T) a;
 		
 	}
 	
@@ -226,7 +230,7 @@ public class AssetManager {
 	
 	private int atlasIDInc = 0;
 
-	private Asset loadAtlas(String path) {
+	private Atlas loadAtlas(String path) {
 		
 		ReadFile file = new ReadFile(path);
 		
@@ -297,7 +301,7 @@ public class AssetManager {
 		return extension;
 	}
 	
-	private Asset loadShader(String p1, char p1Type, String p2) {
+	private Shader loadShader(String p1, char p1Type, String p2) {
 		
 		String vert, frag;
 		
@@ -312,7 +316,7 @@ public class AssetManager {
 		return new Shader(getNewID(id, SHADER_TID));
 	}
 
-	private Asset loadTexture(String filePath) throws Exception {
+	private Texture loadTexture(String filePath) throws Exception {
 		
 		IntBuffer width = BufferUtils.createIntBuffer(1);
 		IntBuffer height = BufferUtils.createIntBuffer(1);

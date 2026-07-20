@@ -15,6 +15,8 @@ import assets.Region;
 import assets.Texture;
 import controller.Controller;
 import ecs.EngineComponets.Pos;
+import ecs.EngineComponets.Size;
+import ecs.EngineComponets.TextureC;
 import ecs.Entity;
 import fileManager.SaveFile;
 import graphical.userInput.AltKeys;
@@ -54,9 +56,9 @@ public class AtlasCreator extends Scene {
 			if(Objects.isNull(selected)) {return;}
 				
 			image = new Entity(List.of(
-					Controller.componets.new Pos(defaultSizeX, defaultSizeY),
-					Controller.componets.new Size(selected.size.x, selected.size.y),
-					Controller.componets.new TextureC(path)
+					new Pos(defaultSizeX, defaultSizeY),
+					new Size(selected.size.x, selected.size.y),
+					new TextureC(path)
 					), entities);
 				
 			Controller.graphics.setScreenSize(new Point(selected.size.x + defaultSizeX, selected.size.y + defaultSizeY));
@@ -121,9 +123,9 @@ public class AtlasCreator extends Scene {
 		if(!exists) {
 			
 			new Entity(List.of(
-					Controller.componets.new Pos(x, y),
-					Controller.componets.new Size(defaultSizeX, defaultSizeY),
-					Controller.componets.new TextureC(highlight)
+					new Pos(x, y),
+					new Size(defaultSizeX, defaultSizeY),
+					new TextureC(highlight)
 					), entities);
 			
 			grid.add(gridPos);

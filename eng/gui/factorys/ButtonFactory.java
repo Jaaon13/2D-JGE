@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import ecs.EngineComponets.Depth;
-import ecs.EngineComponets.Depth.Layer;
 import ecs.EngineComponets.Listener;
 import ecs.EngineComponets.Listener.EventWrapper;
 import ecs.EngineComponets.PlainShape;
@@ -15,7 +14,6 @@ import ecs.EngineComponets.Size;
 import ecs.EngineComponets.TextureC;
 import ecs.Entity;
 import ecs.EntityManager;
-import gui.factorys.TextFactory.Alignment;
 import sceneManagment.Event;
 import sceneManagment.Event.type;
 

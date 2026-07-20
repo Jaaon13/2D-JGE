@@ -2,14 +2,10 @@ package utilities;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import controller.Controller;
 import ecs.EntityManager;
 import gui.factorys.Text;
 import gui.factorys.TextFactory;

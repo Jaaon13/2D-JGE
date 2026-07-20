@@ -1,13 +1,11 @@
 package controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ecs.Entity;
-import ecs.EntityManager;
 import gui.factorys.Text;
 import logger.Logger.LoggerInfo;
 import sceneManagment.Event;
@@ -31,8 +29,6 @@ public class SceneController {
 	
 	private boolean switchedTo = false;
 	
-	public EntityManager ecs;
-	
 	// Main loop for the scenes
 	// Also calculates FPS
 	public List<Entity> execute() {
@@ -43,7 +39,7 @@ public class SceneController {
 			scenes.get(curIndex).switchedTo();
 		}
 		
-		if( ((float) (System.nanoTime() - (float) lastRun) / 1000000000) >= Controller.globals.fixedDelta ) {
+		if( ((float)(System.nanoTime() - lastRun) / 1_000_000_000f) >= Controller.globals.fixedDelta ) {
 			
 			lastRun = System.nanoTime();
 			
@@ -100,7 +96,7 @@ public class SceneController {
 		
 		switchedTo = false;
 		
-		ecs = scenes.get(id).entities;
+		Controller.currentScene = scenes.get(id);
 		
 	}
 

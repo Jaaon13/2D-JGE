@@ -1,0 +1,215 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>2D-JGE</groupId>
+	<artifactId>2D-JGE</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+  
+	<properties>
+		<!-- The game specific variables -->
+		<game.folder>bulletHell</game.folder>
+		<main.class>app.BMain</main.class>
+	
+		<lwjgl.version>3.4.1</lwjgl.version>
+		<joml.version>1.10.9</joml.version>
+	</properties>
+
+<profiles>
+	<profile>
+		<id>lwjgl-natives-windows-amd64</id>
+		<activation>
+			<os>
+				<family>windows</family>
+				<arch>amd64</arch>
+			</os>
+		</activation>
+		<properties>
+			<lwjgl.natives>natives-windows</lwjgl.natives>
+		</properties>
+	</profile>
+	<profile>
+		<id>lwjgl-natives-windows-x86</id>
+		<activation>
+			<os>
+				<family>windows</family>
+				<arch>x86</arch>
+			</os>
+		</activation>
+		<properties>
+			<lwjgl.natives>natives-windows-x86</lwjgl.natives>
+		</properties>
+	</profile>
+	<profile>
+		<id>lwjgl-natives-windows-aarch64</id>
+		<activation>
+			<os>
+				<family>windows</family>
+				<arch>aarch64</arch>
+			</os>
+		</activation>
+		<properties>
+			<lwjgl.natives>natives-windows-arm64</lwjgl.natives>
+		</properties>
+	</profile>
+</profiles>
+
+<dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-bom</artifactId>
+			<version>${lwjgl.version}</version>
+			<scope>import</scope>
+			<type>pom</type>
+		</dependency>
+	</dependencies>
+</dependencyManagement>
+
+<dependencies>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl-glfw</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl-openal</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl-opengl</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl-stb</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl</artifactId>
+		<classifier>${lwjgl.natives}</classifier>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl-glfw</artifactId>
+		<classifier>${lwjgl.natives}</classifier>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl-openal</artifactId>
+		<classifier>${lwjgl.natives}</classifier>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl-opengl</artifactId>
+		<classifier>${lwjgl.natives}</classifier>
+	</dependency>
+	<dependency>
+		<groupId>org.lwjgl</groupId>
+		<artifactId>lwjgl-stb</artifactId>
+		<classifier>${lwjgl.natives}</classifier>
+	</dependency>
+	<dependency>
+		<groupId>org.joml</groupId>
+		<artifactId>joml</artifactId>
+		<version>${joml.version}</version>
+	</dependency>
+</dependencies>
+  
+  <build>
+  
+  	<extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.1</version>
+            </extension>
+        </extensions>
+    <resources>
+      <resource>
+        <directory>eng</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>engtools</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>${game.folder}</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <release>21</release>
+         
+        </configuration>
+      </plugin>
+      <plugin>
+      	<groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+           <mainClass>${main.class}</mainClass>
+        </configuration>
+      </plugin>
+	  <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.5.0</version> <!-- Use the latest version available -->
+            <executions>
+                <execution>
+                    <id>add-source</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>add-source</goal>
+                    </goals>
+                    <configuration>
+                        <sources>>
+                        	<source>eng</source>
+                            <source>engtools</source>
+                            <source>${game.folder}</source>
+                        </sources>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+      	<plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-shade-plugin</artifactId>
+           <version>3.6.2</version> <!-- Use the latest stable version -->
+           <executions>
+              <execution>
+                 <phase>package</phase>
+                    <goals>
+                       <goal>shade</goal>
+                     </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${main.class}</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+    </plugins>
+  </build>
+</project>

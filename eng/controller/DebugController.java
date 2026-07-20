@@ -6,6 +6,8 @@ public class DebugController {
 	
 	public boolean fps = false;
 	
+	public boolean hitBoxes = false;
+	
 	public long avgFps = 0;
 	
 	// Runs a debug command if a certain input is pressed
@@ -28,11 +30,7 @@ public class DebugController {
 			return true;
 			
 		case AltKeys.F10:
-			
-			int id = Controller.scenes.addScene(new atlasCreator.AtlasCreator());
-			
-			Controller.scenes.setScene(id);
-				
+			hitBoxes = !hitBoxes;
 			return true;
 				
 		case '`':

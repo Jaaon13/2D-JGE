@@ -3,8 +3,11 @@ package gui.factorys;
 import java.awt.Point;
 import java.util.List;
 
-import ecs.EngineComponets.*;
+import ecs.EngineComponets.Depth;
 import ecs.EngineComponets.Depth.Layer;
+import ecs.EngineComponets.Pos;
+import ecs.EngineComponets.Size;
+import ecs.EngineComponets.TextureC;
 import ecs.Entity;
 import ecs.EntityManager;
 
@@ -64,7 +67,7 @@ public class TextFactory {
 			new Entity(List.of( 
 					new Pos(start.x + offset, start.y), 
 					new Size(defaultTextSize.x, defaultTextSize.y),
-					new TextureC("\\eng\\graphical\\rendering\\fonts\\minogram_6x10", s + ""),
+					new TextureC("fonts\\minogram_6x10", s + ""),
 					new Depth(Layer.GUI)
 					), em, isTemporary);
 			

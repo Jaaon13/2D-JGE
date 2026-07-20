@@ -14,13 +14,13 @@ public class Entity {
 		
 		id = Controller.assets.genEntityID();
 		
-		entities.add(this);
-		
 		for(Componet c : cpnets) {
 			
 			entities.addComponet(id, c);
 			
 		}
+		
+		entities.add(this);
 		
 	}
 	
@@ -32,13 +32,13 @@ public class Entity {
 			id = Controller.assets.genTempID();
 		}
 		
-		entities.add(this);
-		
 		for(Componet c : cpnets) {
 			
 			entities.addComponet(id, c);
 			
 		}
+		
+		entities.add(this);
 		
 	}
 	

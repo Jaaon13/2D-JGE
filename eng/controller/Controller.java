@@ -11,11 +11,11 @@ import org.lwjgl.glfw.GLFW;
 import defaultScene.EngineLoadingScene;
 import ecs.EngineComponets;
 import ecs.Entity;
-import graphical.rendering.BasicRenderer;
 import graphical.rendering.PainterRenderer;
 import gui.factorys.Text;
 import logger.Logger;
 import logger.Logger.LoggerInfo;
+import sceneManagment.Scene;
 import utilities.FpsCounter;
 
 public class Controller {
@@ -36,10 +36,12 @@ public class Controller {
 	public static final ControllerData globals = new ControllerData();
 	
 	// Global logger
-	public static final Logger logger = new Logger(globals.dir + "\\logs\\");
+	public static final Logger logger = new Logger(System.getProperty("user.dir") + "\\logs\\");
 	
-	// ESC TEST
+	// Compononets
 	public static final EngineComponets componets = new EngineComponets();
+	
+	public static Scene currentScene;
 	
 	public static volatile boolean running = true;
 	
@@ -53,7 +55,6 @@ public class Controller {
 		Controller.graphics.removeTextOverlay("GPU");
 	}
 	
-	@SuppressWarnings({ "unused" })
 	public static void engineLoop() {
 		
 		if (GLFW.glfwRawMouseMotionSupported())
@@ -117,13 +118,23 @@ public class Controller {
 		close();
 		
 	}
+	
+	private static long tps = 0;
+	private static long last = System.currentTimeMillis();
+	private static long lasttick = 0;
 
 	private static void updateEngineOverlays() {
 		
 		if(!debug.fps) {return;}
 		
+		if(System.currentTimeMillis() - last >= 1000) {
+			tps = globals.tick - lasttick;
+			lasttick = globals.tick;
+			last = System.currentTimeMillis();
+		}
+		
 		String fpsdata = "FPS AVG: " + FpsCounter.fpsAvg + " FPS HIGH: " 
-		+ FpsCounter.fpsHigh + " FPS LOW " + FpsCounter.fpsLow;
+		+ FpsCounter.fpsHigh + " FPS LOW: " + FpsCounter.fpsLow + " TPS: " + tps;
 		
 		String fpsPer = "", gpuPer = "", textPer = "";
 		

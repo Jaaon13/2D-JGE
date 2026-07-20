@@ -21,8 +21,8 @@ public class GraphicsController {
 		
 		createWindow(title);
 		
-		Controller.globals.defaultFont = (Texture) Controller.assets.load("\\eng\\graphical\\rendering\\fonts\\minogram_6x10.png");
-		Controller.globals.defaultFont.atlas = (Atlas) Controller.assets.load("\\eng\\graphical\\rendering\\fonts\\minogram_6x10.atlas");
+		Controller.globals.defaultFont = (Texture) Controller.assets.load("fonts\\minogram_6x10.png");
+		Controller.globals.defaultFont.atlas = (Atlas) Controller.assets.load("fonts\\minogram_6x10.atlas");
 		
 		Controller.engineLoop();
 		

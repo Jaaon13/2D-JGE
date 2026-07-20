@@ -9,7 +9,7 @@ import graphical.componets.Camera;
 
 public class ControllerData {
 	
-	public String dir = System.getProperty("user.dir");
+	public String dir = System.getProperty("user.dir") + "\\assets\\";
 
 	public Texture defaultFont;
 	

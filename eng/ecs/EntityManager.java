@@ -9,8 +9,9 @@ import java.util.Map;
 import controller.Controller;
 import ecs.EngineComponets.Listener;
 import ecs.EngineComponets.Listener.EventWrapper;
-import logger.Logger.LoggerInfo;
 import ecs.EngineComponets.Pos;
+import ecs.EngineComponets.Size;
+import logger.Logger.LoggerInfo;
 import sceneManagment.Event;
 
 public class EntityManager {
@@ -21,12 +22,9 @@ public class EntityManager {
 	private Map<Class<? extends Componet>, Map<Integer, Componet>> componets = new HashMap<>();
 	
 	public void add(Entity e) {
-		
 		entities.add(e);
-		
+		Controller.currentScene.phys.add(e);
 	}
-	
-	
 	
 	public void addComponet(int id, Componet c) {
 		
@@ -38,10 +36,10 @@ public class EntityManager {
 		
 	}
 	
-	@SuppressWarnings("unused")
-	public Componet get(Entity e, Class<? extends Componet> c) {
+	@SuppressWarnings({ "unused", "unchecked" })
+	public <T extends Componet> T get(Entity e, Class<? extends Componet> c) {
 		try {
-			return get(e.id, c);
+			return (T) get(e.id, c);
 		} catch(NullPointerException err) {
 			if(false) { // Will overflow the logging!
 				Controller.logger.log(List.of("Tried to get a componet that does not exist!", "Entity ID: " + e.id), LoggerInfo.WARNING);
@@ -50,9 +48,10 @@ public class EntityManager {
 		}
 	}
 	
-	public Componet get(int id, Class<? extends Componet> c) {
+	@SuppressWarnings("unchecked")
+	public <T extends Componet> T get(int id, Class<? extends Componet> c) {
 		
-		return componets.get(c).get(id);
+		return (T) componets.get(c).get(id);
 		
 	}
 	
@@ -100,6 +99,7 @@ public class EntityManager {
 					"Tried to update: " + c + " componet and it did not exist"), LoggerInfo.WARNING);
 			return;
 		}
+		
 		comp.update(t);
 	}
 
@@ -118,6 +118,8 @@ public class EntityManager {
 			}
 			
 		}
+		
+		Controller.currentScene.phys.remove(e);
 		
 	}
 	
@@ -157,8 +159,11 @@ public class EntityManager {
 	}
 	
 	public boolean contains(int id, Class<? extends Componet> c) {
-		
-		return componets.get(c).containsKey(id);
+		try {
+			return componets.get(c).containsKey(id);
+		} catch(Exception e) {
+			return false;
+		}
 		
 	}
 	
@@ -178,8 +183,9 @@ public class EntityManager {
 		for(Entity e : entities) {
 			
 			Pos p = (Pos) get(e, Pos.class);
+			Size sz = (Size) get(e, Size.class);
 			
-			if( (p.x >= 0 && p.x <= s.x) && (p.y >= 0 && p.y <= s.y)) {
+			if( (p.x >= 0 - sz.x && p.x <= s.x + sz.x) && (p.y >= 0 - sz.y && p.y <= s.y + sz.y)) {
 				visible.add(e);
 			}
 			

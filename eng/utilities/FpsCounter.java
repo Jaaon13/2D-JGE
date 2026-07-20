@@ -54,7 +54,7 @@ public class FpsCounter {
 			timedif = 1;
 		}
 		
-		long fps = 1000000000 / timedif;
+		long fps = (long) (1f / ((float)timedif / 1_000_000_000f));
 		
 		fpsBuffer.offer(fps);
 		

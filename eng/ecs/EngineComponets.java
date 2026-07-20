@@ -7,12 +7,15 @@ import java.util.function.Function;
 import assets.Atlas;
 import assets.Texture;
 import controller.Controller;
+import ecs.EngineComponets.MoveableObj;
+import ecs.EngineComponets.Pos;
 import logger.Logger.LoggerInfo;
+import physics.Vector;
 import sceneManagment.Event;
 
 public class EngineComponets {
 	
-	private static <T> void updateErr(T t, Class<? extends Componet> c) {
+	public static <T> void updateErr(T t, Class<? extends Componet> c) {
 		Controller.logger.log(List.of("Tried to use an invalid type to update a " + c + " component!",
 				"Generic class: " + t.getClass()), LoggerInfo.WARNING);
 	}
@@ -260,6 +263,107 @@ public class EngineComponets {
 		@Override
 		protected <T> void update(T t) {
 			updateErr(t, PlainShape.class);
+		}
+		
+	}
+	
+	public static class Collision extends Componet {
+
+		public static abstract class CollisionStrat {
+			
+			public abstract void collision(Entity me, Entity other, EntityManager ecs, float delta);
+			
+		}
+		
+		public static class AvoidStrat extends CollisionStrat {
+
+			@Override
+			public void collision(Entity me, Entity other, EntityManager ecs, float delta) {
+				
+				MoveableObj mo = ecs.get(me, MoveableObj.class);
+				
+				mo.position.x -= mo.velocity.x * delta;
+				mo.position.y -= mo.velocity.y * delta;
+				
+				ecs.update(me, Pos.class, new Point((int)mo.position.x, (int)mo.position.y));
+				
+			}
+			
+		}
+		
+		public static enum shape {
+			
+			COL_SQRUARE,
+			
+		}
+		
+		public static enum movement {
+			
+			MOV_STATIC,
+			MOV_DYNAMIC
+			
+		}
+		
+		public Collision.shape shape;
+		public Collision.movement movement;
+		
+		public int size;
+		public Point offset;
+		
+		public CollisionStrat strat;
+		
+		public Collision(Collision.shape s, Collision.movement m, int size, Point posOffset, CollisionStrat strat) {
+			construct(s, m, size, posOffset, strat);
+		}
+		
+		// The size variable will either be the radius or square side length,
+		// the posOffset is the position from the top left of the entity
+		public Collision(Collision.shape s, Collision.movement m, int size, Point posOffset) {
+			construct(s, m, size, posOffset, new AvoidStrat());
+		}
+		
+		private void construct(Collision.shape s, Collision.movement m, int size, Point posOffset, CollisionStrat strat) {
+			this.shape = s;
+			this.movement = m;
+			this.size = size;
+			this.offset = posOffset;
+			this.strat = strat;
+			
+		}
+
+		@Override
+		protected <T> void update(T t) {
+			
+			if(t instanceof shape) {
+				shape = (Collision.shape) t;
+			} else if(t instanceof movement) {
+				movement = (Collision.movement) t;
+			} else if(t instanceof Integer) {
+				size = (int) t;
+			} else if(t instanceof Point) {
+				offset = (Point) t;
+			} else {
+				updateErr(t, Collision.class);
+			}
+			
+		}
+	}
+	
+	public static class MoveableObj extends Componet {
+		
+		// This is supposed to be explicitly changed by anyone
+		public Vector direction = new Vector(), velocity = new Vector(), position = new Vector();
+		public int maxSpeed, acceleration, friction;
+		
+		public MoveableObj(int max, int accel, int frict) {
+			this.maxSpeed = max;
+			this.acceleration = accel;
+			this.friction = frict;
+		}
+
+		@Override
+		protected <T> void update(T t) {
+			updateErr(t, MoveableObj.class);
 		}
 		
 	}

@@ -20,6 +20,8 @@ public class Logger {
 	
 	private List<String> lines = new ArrayList<>();
 	
+	private boolean loggingEnabled = true;
+	
 	public enum LoggerInfo {
 		
 		INFO,
@@ -40,11 +42,15 @@ public class Logger {
 			
 			file = new FileWriter(homeDir + date + ".txt", true);
 		} catch (IOException e) {
-			e.printStackTrace();
+			
+			loggingEnabled = false;
+			
 		}
 	}
 	
 	public void log(String data, LoggerInfo info) {
+		
+		if(!loggingEnabled) {return;}
 		
 		String temp;
 		
@@ -68,6 +74,8 @@ public class Logger {
 	}
 	
 	public void log(List<String> data, LoggerInfo info) {
+		
+		if(!loggingEnabled) {return;}
 		
 		String temp;
 		
@@ -97,6 +105,8 @@ public class Logger {
 	}
 	
 	public void close() {
+		
+		if(!loggingEnabled) {return;}
 		
 		try (BufferedWriter bFile = new BufferedWriter(file)) {
 			
