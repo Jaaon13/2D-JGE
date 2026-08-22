@@ -9,7 +9,7 @@ import ecs.EngineComponets.Pos;
 import ecs.EngineComponets.Size;
 import ecs.EngineComponets.TextureC;
 import ecs.Entity;
-import ecs.EntityManager;
+import sceneManagment.World;
 
 public class TextFactory {
 
@@ -23,19 +23,19 @@ public class TextFactory {
 	
 	private static final Point defaultTextSize = new Point(6, 10);
 	
-	public static void generateText(String data, Point pos, Alignment a, EntityManager em, boolean isTemporary) {
+	public static void generateText(String data, Point pos, Alignment a, World world, boolean isTemporary) {
 		
-		genText(data, pos, Integer.MAX_VALUE, a, em, isTemporary);
-		
-	}
-	
-	public static void generateText(String data, Point pos, int depth, Alignment a, EntityManager em, boolean isTemporary) {
-		
-		genText(data, pos, depth, a, em, isTemporary);
+		genText(data, pos, Integer.MAX_VALUE, a, world, isTemporary);
 		
 	}
 	
-	private static void genText(String data, Point pos, int depth, Alignment a, EntityManager em, boolean isTemporary) {
+	public static void generateText(String data, Point pos, int depth, Alignment a, World world, boolean isTemporary) {
+		
+		genText(data, pos, depth, a, world, isTemporary);
+		
+	}
+	
+	private static void genText(String data, Point pos, int depth, Alignment a, World world, boolean isTemporary) {
 		
 		Point start;
 		
@@ -69,7 +69,7 @@ public class TextFactory {
 					new Size(defaultTextSize.x, defaultTextSize.y),
 					new TextureC("fonts\\minogram_6x10", s + ""),
 					new Depth(Layer.GUI)
-					), em, isTemporary);
+					), world, isTemporary);
 			
 			offset += defaultTextSize.x;
 			

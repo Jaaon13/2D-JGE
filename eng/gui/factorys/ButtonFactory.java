@@ -13,55 +13,55 @@ import ecs.EngineComponets.Pos;
 import ecs.EngineComponets.Size;
 import ecs.EngineComponets.TextureC;
 import ecs.Entity;
-import ecs.EntityManager;
 import sceneManagment.Event;
 import sceneManagment.Event.type;
+import sceneManagment.World;
 
 public class ButtonFactory {
 	
 	// Allows depth input and a custom listener script // Dangerous!
 	public static void CreateButton(String data, TextFactory.Alignment a, Point pos, Point size, int depth,
-			Function<EventWrapper, Boolean> script, Event.type event, EntityManager em) {
+			Function<EventWrapper, Boolean> script, Event.type event, World world) {
 		
-		create(data, a, pos, size, depth, script, event, em);
+		create(data, a, pos, size, depth, script, event, world);
 		
 	}
 	
 	// Allows a custom listener script // Dangerous!
 	public static void CreateButton(String data, TextFactory.Alignment a, Point pos, Point size, 
-			Function<EventWrapper, Boolean> script, Event.type event, EntityManager em) {
+			Function<EventWrapper, Boolean> script, Event.type event, World world) {
 		
-		create(data, a, pos, size, Integer.MAX_VALUE, script, event, em);
+		create(data, a, pos, size, Integer.MAX_VALUE, script, event, world);
 		
 	}
 	
 	// Allows a custom depth input
 	public static void CreateButton(String data, TextFactory.Alignment a, Point pos, Point size, int depth, 
-			Runnable r, EntityManager em) {
+			Runnable r, World world) {
 		
-		createf(data, a, pos, size, depth, r, type.UI_MouseLClick, em);
+		createf(data, a, pos, size, depth, r, type.UI_MouseLClick, world);
 		
 	}
 	
 	// Basic call
 	public static void CreateButton(String data, TextFactory.Alignment a, Point pos, Point size, 
-			Runnable r, EntityManager em) {
+			Runnable r, World world) {
 		
-		createf(data, a, pos, size, Integer.MAX_VALUE, r, type.UI_MouseLClick, em);
+		createf(data, a, pos, size, Integer.MAX_VALUE, r, type.UI_MouseLClick, world);
 		
 	}
 	
 	// Needed for the default script to be created for the user
 	private static void createf(String data, TextFactory.Alignment a, Point pos, Point size, int depth, 
-			Runnable r, Event.type event, EntityManager em) {
+			Runnable r, Event.type event, World world) {
 		
-		create(data, a, pos, size, depth, makeFunction(r), event, em);
+		create(data, a, pos, size, depth, makeFunction(r), event, world);
 		
 	}
 	
 	// Creates all the entities
 	private static void create(String data, TextFactory.Alignment a, Point pos, Point size, int depth, 
-			Function<EventWrapper, Boolean> script, Event.type event, EntityManager em) {
+			Function<EventWrapper, Boolean> script, Event.type event, World world) {
 		
 		new Entity(List.of(
 				new Pos(pos.x, pos.y),
@@ -69,14 +69,14 @@ public class ButtonFactory {
 				new Depth(depth),
 				new Listener(event, script),
 				new PlainShape(255, 255, 255, Shape.RECTANGLE)
-				), em);
+				), world);
 		
-		TextFactory.generateText(data, new Point(pos.x + (size.x / 2), pos.y + (size.y / 2)), depth, a, em, false);
+		TextFactory.generateText(data, new Point(pos.x + (size.x / 2), pos.y + (size.y / 2)), depth, a, world, false);
 		
 	}
 	
 	public static void createButton(String data, Point pos, Point size, int depth, String texture,
-			Runnable r, EntityManager em) {
+			Runnable r, World world) {
 		
 		new Entity(List.of(
 				new Pos(pos.x, pos.y),
@@ -84,9 +84,9 @@ public class ButtonFactory {
 				new Depth(depth),
 				new Listener(type.UI_MouseLClick, makeFunction(r)),
 				new TextureC(texture)
-				), em);
+				), world);
 		
-		TextFactory.generateText(data, new Point(pos.x + (size.x / 2), pos.y + (size.y / 2)), TextFactory.Alignment.CENTER, em, false);
+		TextFactory.generateText(data, new Point(pos.x + (size.x / 2), pos.y + (size.y / 2)), TextFactory.Alignment.CENTER, world, false);
 		
 	}
 	

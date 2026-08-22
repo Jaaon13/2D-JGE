@@ -44,6 +44,7 @@ public class SceneController {
 			lastRun = System.nanoTime();
 			
 			scenes.get(curIndex).fixedUpdate();
+			scenes.get(curIndex).world.phys.fixedUpdate();
 			Controller.globals.tick++;
 			
 		}
@@ -51,12 +52,15 @@ public class SceneController {
 		if(curIndex != -1 && scenes.containsKey(curIndex)) {
 			
 			scenes.get(curIndex).events = getAllEvents();
-			scenes.get(curIndex).entities.provokeListerners(events);
+			scenes.get(curIndex).world.ecs.provokeListerners(events);
 			scenes.get(curIndex).update();
+			scenes.get(curIndex).world.phys.update(events);
 			
 			events.removeAll(events);
 			
-			List<Entity> objs = scenes.get(curIndex).entities.getVisible();
+			List<Entity> objs = scenes.get(curIndex).world.container.getAllVisible();
+			
+			scenes.get(curIndex).world.container.regenerate();
 			
 			return objs;
 		}

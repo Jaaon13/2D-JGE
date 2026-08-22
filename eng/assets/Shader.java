@@ -9,7 +9,7 @@ public class Shader extends Asset {
 	
 	@Override
 	public void release() {
-		// TODO Auto-generated method stub
+		// TODO Add Shader release function
 		
 	}
 

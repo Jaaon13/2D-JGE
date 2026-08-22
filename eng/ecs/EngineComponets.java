@@ -7,8 +7,6 @@ import java.util.function.Function;
 import assets.Atlas;
 import assets.Texture;
 import controller.Controller;
-import ecs.EngineComponets.MoveableObj;
-import ecs.EngineComponets.Pos;
 import logger.Logger.LoggerInfo;
 import physics.Vector;
 import sceneManagment.Event;
@@ -46,6 +44,10 @@ public class EngineComponets {
 			}
 		}
 		
+		public String toString() {
+			return "Posistion: " + x + ", " + y;
+		}
+		
 	}
 	
 	public static class Size extends Componet {
@@ -72,6 +74,10 @@ public class EngineComponets {
 			} else {
 				updateErr(t, Size.class);
 			}
+		}
+		
+		public String toString() {
+			return "Size: " + x + ", " + y;
 		}
 		
 	}
@@ -129,6 +135,10 @@ public class EngineComponets {
 			}
 		}
 		
+		public String toString() {
+			return "Depth: " + depth;
+		}
+		
 	}
 	
 	public static class Listener extends Componet {
@@ -166,6 +176,10 @@ public class EngineComponets {
 		@Override
 		protected <T> void update(T t) {
 			updateErr(t, Listener.class);
+		}
+		
+		public String toString() {
+			return "Listener: is listening for event type of, " + eventListener;
 		}
 		
 	}
@@ -235,6 +249,11 @@ public class EngineComponets {
 			}
 		}
 		
+		public String toString() {
+			return "Texture: " + "texture data: " + texture.filePath + " | " + texture.id + 
+					((atlas != null) ? (" atlas location: " + atlas.x + ", " + atlas.y) : "");
+		}
+		
 	}
 	
 	
@@ -265,6 +284,10 @@ public class EngineComponets {
 			updateErr(t, PlainShape.class);
 		}
 		
+		public String toString() {
+			return "PlainShape: " + shape;
+		}
+		
 	}
 	
 	public static class Collision extends Componet {
@@ -280,54 +303,111 @@ public class EngineComponets {
 			@Override
 			public void collision(Entity me, Entity other, EntityManager ecs, float delta) {
 				
-				MoveableObj mo = ecs.get(me, MoveableObj.class);
+				Collision oc = Controller.currentScene.world.ecs.get(other, Collision.class);
 				
-				mo.position.x -= mo.velocity.x * delta;
-				mo.position.y -= mo.velocity.y * delta;
+				switch(oc.material) {
+					case IS_SOLID:
+						break;
+					case NOT_SOLID:
+						return;
+				}
 				
-				ecs.update(me, Pos.class, new Point((int)mo.position.x, (int)mo.position.y));
+				Vector mycenter = getVector(me);
+				Vector othercenter = getVector(other);
+				
+				Vector repel = new Vector(
+						othercenter.x - mycenter.x,
+						othercenter.y - mycenter.y
+						);
+				
+				repel = repel.normalize().getInverse();
+				
+				MoveableObj mo = Controller.currentScene.world.ecs.get(me, MoveableObj.class);
+				
+				while(Controller.currentScene.world.phys.AABBcheck(me, other)) {
+					
+					if(Math.abs(repel.x) >= Math.abs(repel.y)) {
+						mo.position.x += repel.x;
+					} else {
+						mo.position.y += repel.y;
+					}
+					
+				}
+				
+			}
+			
+			private Vector getVector(Entity e) {
+				
+				Pos pos = Controller.currentScene.world.ecs.get(e, Pos.class);
+				
+				Vector r = (Controller.currentScene.world.ecs.contains(e, MoveableObj.class))
+						? ((MoveableObj)(Controller.currentScene.world.ecs.get(e, MoveableObj.class))).position.copy()
+								: new Vector(pos.x, pos.y);
+				
+				Size s = Controller.currentScene.world.ecs.get(e, Size.class);
+				r.x += (float)s.x/2;
+				r.y += (float)s.y/2;
+				
+				return r;
 				
 			}
 			
 		}
 		
-		public static enum shape {
+		public static class NullStrat extends CollisionStrat {
+			public void collision(Entity me, Entity other, EntityManager ecs, float delta) {}
+		}
+		
+		public enum shape {
 			
 			COL_SQRUARE,
 			
 		}
 		
-		public static enum movement {
+		public enum movement {
 			
 			MOV_STATIC,
 			MOV_DYNAMIC
 			
 		}
 		
+		public enum material { 
+			
+			IS_SOLID,
+			NOT_SOLID,
+			
+		}
+		
 		public Collision.shape shape;
 		public Collision.movement movement;
+		public Collision.material material;
 		
 		public int size;
 		public Point offset;
 		
 		public CollisionStrat strat;
 		
-		public Collision(Collision.shape s, Collision.movement m, int size, Point posOffset, CollisionStrat strat) {
-			construct(s, m, size, posOffset, strat);
+		public Collision(Collision.shape s, Collision.movement m, Collision.material c, int size, Point posOffset, CollisionStrat strat) {
+			construct(s, m, c, size, posOffset, strat);
 		}
 		
 		// The size variable will either be the radius or square side length,
 		// the posOffset is the position from the top left of the entity
-		public Collision(Collision.shape s, Collision.movement m, int size, Point posOffset) {
-			construct(s, m, size, posOffset, new AvoidStrat());
+		public Collision(Collision.shape s, Collision.movement m, Collision.material c, int size, Point posOffset) {
+			construct(s, m, c, size, posOffset, new AvoidStrat());
 		}
 		
-		private void construct(Collision.shape s, Collision.movement m, int size, Point posOffset, CollisionStrat strat) {
+		private void construct(Collision.shape s, Collision.movement m, Collision.material c, int size, Point posOffset, CollisionStrat strat) {
 			this.shape = s;
 			this.movement = m;
 			this.size = size;
 			this.offset = posOffset;
-			this.strat = strat;
+			if(this.movement != movement.MOV_STATIC) {
+				this.strat = strat;
+			} else {
+				this.strat = new NullStrat();
+			}
+			this.material = c;
 			
 		}
 
@@ -347,23 +427,71 @@ public class EngineComponets {
 			}
 			
 		}
+		
+		public String toString() {
+			return "Colllision: " + "strat class, " + strat.getClass() + " shape, " + shape + " movement: " 
+					+ movement + " material, " + material; 
+		}
 	}
 	
 	public static class MoveableObj extends Componet {
 		
 		// This is supposed to be explicitly changed by anyone
-		public Vector direction = new Vector(), velocity = new Vector(), position = new Vector();
+		public Vector direction = new Vector(), velocity = new Vector(), position = new Vector(), lastPosition = new Vector();
+		
+		// Descriptors
 		public int maxSpeed, acceleration, friction;
+		public Triggers triggers;
 		
 		public MoveableObj(int max, int accel, int frict) {
 			this.maxSpeed = max;
 			this.acceleration = accel;
 			this.friction = frict;
+			this.triggers = new DefaultTriggers();
+		}
+		
+		public MoveableObj(int max, int accel, int frict, Triggers newTriggers) {
+			this.maxSpeed = max;
+			this.acceleration = accel;
+			this.friction = frict;
+			this.triggers = newTriggers;
+		}
+		
+		public static abstract class Triggers {
+			
+			public abstract void onStop(Entity e);
+			
+			public abstract void onMapLeave(Entity e);
+			
+		}
+		
+		public static class DefaultTriggers extends Triggers {
+
+			@Override
+			public void onStop(Entity e) {}
+
+			@Override
+			public void onMapLeave(Entity e) {}
+
 		}
 
 		@Override
 		protected <T> void update(T t) {
 			updateErr(t, MoveableObj.class);
+		}
+		
+		public String toString() {
+			String tor = "MoveableObj: data";
+			
+			tor += "\n\tDirection: " + direction.toString();
+			tor += "\n\tVelocity: " + velocity.toString();
+			tor += "\n\tPosition: " + position.toString();
+			tor += "\n\tLast Position: " + lastPosition.toString();
+			tor += "\n\tMax Speed: " + maxSpeed;
+			tor += "\n\tAcceleration: " + acceleration;
+			tor += "\n\tFriction: " + friction;
+			
+			return tor;
 		}
 		
 	}

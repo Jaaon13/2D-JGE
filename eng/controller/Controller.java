@@ -48,11 +48,13 @@ public class Controller {
 	public static void createFPS() {
 		Controller.graphics.addTextOverlay("FPS", new Point(0, 0));
 		Controller.graphics.addTextOverlay("GPU", new Point(0, 10));
+		Controller.graphics.addTextOverlay("MEM", new Point(0, 20));
 	}
 	
 	public static void removeFPS() {
 		Controller.graphics.removeTextOverlay("FPS");
 		Controller.graphics.removeTextOverlay("GPU");
+		Controller.graphics.removeTextOverlay("MEM");
 	}
 	
 	public static void engineLoop() {
@@ -123,6 +125,8 @@ public class Controller {
 	private static long last = System.currentTimeMillis();
 	private static long lasttick = 0;
 
+	private static Runtime runtime = Runtime.getRuntime();
+	
 	private static void updateEngineOverlays() {
 		
 		if(!debug.fps) {return;}
@@ -166,11 +170,18 @@ public class Controller {
 		String gpudata = "NUM DRAW CALLS: " + render.getDrawCalls() + " NUM TRIANGLES: " + render.getTotalSpritesDrawn() + " SCENE USAGE: "
 		+ fpsPer + "% RENDER USAGE: " + gpuPer + "% TEXT RENDER USAGE: " + textPer + "%";
 		
+		runtime.gc();
+		
+		float mem = (float)(runtime.totalMemory() - runtime.freeMemory()) / (1024f * 1024f);
+		
 		if(graphics.overlayExists("FPS") && debug.fps) {
 			graphics.updateTextOverlay("FPS", fpsdata);
 		}
 		if(graphics.overlayExists("GPU") && debug.fps) {
 			graphics.updateTextOverlay("GPU", gpudata);
+		}
+		if(graphics.overlayExists("MEM") && debug.fps) {
+			graphics.updateTextOverlay("MEM", mem + " MB");
 		}
 		
 	}

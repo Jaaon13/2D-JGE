@@ -49,7 +49,6 @@ public class SaveFile {
 		try {
 			Files.writeString(file, "");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

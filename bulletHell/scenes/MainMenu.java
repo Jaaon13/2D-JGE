@@ -16,7 +16,7 @@ public class MainMenu extends Scene {
 
 	@Override
 	public void fixedUpdate() {
-		ButtonFactory.createButton("Start", new Point(250, 150), new Point(300, 100), 0, "bullethell\\Rectangle", (() -> start()), entities);
+		ButtonFactory.createButton("Start", new Point(250, 150), new Point(300, 100), 0, "bullethell\\Rectangle", (() -> start()), world);
 	}
 
 	private void start() {

@@ -1,6 +1,5 @@
 package ecs;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,21 +8,19 @@ import java.util.Map;
 import controller.Controller;
 import ecs.EngineComponets.Listener;
 import ecs.EngineComponets.Listener.EventWrapper;
-import ecs.EngineComponets.Pos;
-import ecs.EngineComponets.Size;
 import logger.Logger.LoggerInfo;
 import sceneManagment.Event;
+import sceneManagment.World;
 
 public class EntityManager {
 	
-	private List<Entity> entities = new ArrayList<>();
+	private World world;
 	
 	// Sorted by the class of the Componet, and indexed by the entity ID its associated with
 	private Map<Class<? extends Componet>, Map<Integer, Componet>> componets = new HashMap<>();
 	
-	public void add(Entity e) {
-		entities.add(e);
-		Controller.currentScene.phys.add(e);
+	public EntityManager(World world) {
+		this.world = world;
 	}
 	
 	public void addComponet(int id, Componet c) {
@@ -33,6 +30,20 @@ public class EntityManager {
 		}
 		
 		componets.get(c.getClass()).put(id, c);
+		
+	}
+	
+	public boolean remove(Entity e) {
+		
+		boolean success = false;
+		
+		for(Map<Integer, Componet> cmps : componets.values()) {
+			if(cmps.remove(e.id) != null) {
+				success = true;
+			}
+		}
+		
+		return success;
 		
 	}
 	
@@ -87,6 +98,18 @@ public class EntityManager {
 		
 		return cmpts;
 	}
+	
+	public List<Componet> getAll() {
+		
+		List<Componet> cmps = new ArrayList<>();
+		
+		for(Map<Integer, Componet> map : componets.values()) {
+			cmps.addAll(map.values());
+		}
+		
+		return cmps;
+		
+	}
 
 	public <T> void update(Entity e, Class<? extends Componet> c, T t) {
 		update(e.id, c, t);
@@ -101,41 +124,6 @@ public class EntityManager {
 		}
 		
 		comp.update(t);
-	}
-
-
-
-	public void remove(Entity e) {
-		
-		entities.remove(e);
-		
-		for(Map<Integer, Componet> map : componets.values()) {
-			
-			while(map.containsKey(e.id)) {
-				
-				map.remove(e.id);
-				
-			}
-			
-		}
-		
-		Controller.currentScene.phys.remove(e);
-		
-	}
-	
-	public void remove(int id) {
-		
-		for(Entity e : entities) {
-			
-			if(e.id == id) {
-				
-				remove(e);
-				return;
-				
-			}
-			
-		}
-		
 	}
 	
 	public boolean contains(Entity e, List<Class<? extends Componet>> c) {
@@ -168,40 +156,10 @@ public class EntityManager {
 	}
 	
 	public void clear() {
-		
-		entities.clear();
+
 		componets.clear();
 		
 	}
-	
-	public List<Entity> getVisible() {
-		
-		List<Entity> visible = new ArrayList<>();
-		
-		Point s = Controller.globals.screenSize;
-		
-		for(Entity e : entities) {
-			
-			Pos p = (Pos) get(e, Pos.class);
-			Size sz = (Size) get(e, Size.class);
-			
-			if( (p.x >= 0 - sz.x && p.x <= s.x + sz.x) && (p.y >= 0 - sz.y && p.y <= s.y + sz.y)) {
-				visible.add(e);
-			}
-			
-		}
-		
-		return visible;
-		
-	}
-
-
-
-	public List<Entity> getAll() {
-		return entities;
-	}
-
-
 
 	public void provokeListerners(List<Event> events) {
 		

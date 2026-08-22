@@ -9,7 +9,9 @@ public class Texture extends Asset {
 	public Atlas atlas;
 	
 	public void release() {
-		// TODO Add a removal tool
+		
+		
+		
 	}
 	
 	public Texture(Point s, int i, String filePath) {

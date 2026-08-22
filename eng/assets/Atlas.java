@@ -8,7 +8,7 @@ public class Atlas extends Asset {
 
 	@Override
 	public void release() {
-		// TODO Auto-generated method stub
+		// TODO Add atlas release function
 		
 	}
 	

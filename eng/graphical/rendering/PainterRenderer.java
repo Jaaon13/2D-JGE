@@ -62,6 +62,7 @@ import ecs.EntityManager;
 import gui.factorys.Text;
 import gui.factorys.TextFactory;
 import logger.Logger.LoggerInfo;
+import sceneManagment.World;
 
 public class PainterRenderer extends Renderer {
 		
@@ -451,18 +452,34 @@ public class PainterRenderer extends Renderer {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		EntityManager ecs = Controller.currentScene.entities, textEcs = new EntityManager();
+		World textW = new World();
+		
+		EntityManager ecs = Controller.currentScene.world.ecs, textEcs = textW.ecs;
 		
 		Map<Integer, List<RenderWrapper>> layers = new HashMap<>();
 		
-		generateText(textEcs);
+		generateText(textW);
 		
-		int[] keylist = getKeyList(sortEntities(layers, ecs));
+		int[] keylist = getKeyList(sortEntities(layers, Controller.currentScene.world, textW));
+		
+		List<Entity> text = new ArrayList<>(), tsimple = new ArrayList<>();
+		
+		for(Entity e : textW.container.getAllVisible()) {
+			if(textW.ecs.contains(e, TextureC.class)) {
+				text.add(e);
+			} else {
+				tsimple.add(e);
+			}
+		}
 		
 		if(!layers.containsKey(textLayer)) {
-			layers.put(textLayer, List.of(new RenderWrapper(textID, new TextureMesh(textEcs.getVisible(), textEcs))));
-		} else {
-			layers.get(textLayer).add(new RenderWrapper(textID, new TextureMesh(textEcs.getVisible(), textEcs)));
+			layers.put(textLayer, new ArrayList<>());
+		}
+		
+		layers.get(textLayer).add(new RenderWrapper(textID, new TextureMesh(text, textEcs)));
+		
+		if(tsimple.size() != 0) {
+			layers.get(textLayer).add(new RenderWrapper(-1, new SimpleMesh(tsimple, textEcs)));
 		}
 		
 		for(int i = 0; i < keylist.length; i++) {
@@ -533,11 +550,6 @@ public class PainterRenderer extends Renderer {
 		entities.clear();
 		
 		layers.clear();
-		
-		for(Entity e : colBoxToDel) {
-			ecs.remove(e);
-		}
-		colBoxToDel.clear();
 	}
 
 	private int[] getKeyList(int[] temp) {
@@ -552,36 +564,32 @@ public class PainterRenderer extends Renderer {
 		
 		return keylist;
 	}
-	
-	private List<Entity> colBoxToDel = new ArrayList<>();
 
-	private int[] sortEntities(Map<Integer, List<RenderWrapper>> layers, EntityManager ecs) {
+	private int[] sortEntities(Map<Integer, List<RenderWrapper>> layers, World w, World textW) {
 		
 		Map<Integer, List<Entity>> sortedLayer = new HashMap<>();
 		
 		for(Entity e : entities) {
 			
 			if(Controller.debug.hitBoxes) {
-				if(ecs.contains(e, Collision.class)) {
+				if(w.ecs.contains(e, Collision.class)) {
 					
-					Collision c = ecs.get(e, Collision.class);
+					Collision c = w.ecs.get(e, Collision.class);
 					
-					Pos ep = ecs.get(e, Pos.class);
+					Pos ep = w.ecs.get(e, Pos.class);
 					
 					if(!sortedLayer.containsKey(textLayer)) {
 						sortedLayer.put(textLayer, new ArrayList<>());
 					}
-					Entity colBox = new Entity(List.of(
+					new Entity(List.of(
 							new Pos(ep.x + c.offset.x, ep.y + c.offset.y),
 							new Size(c.size, c.size),
 							new PlainShape(255, 0, 0, Shape.RECTANGLE)
-							), ecs, true);
-					sortedLayer.get(textLayer).add(colBox);
-					colBoxToDel.add(colBox);
+							), textW, true);
 				}
 			}
 			
-			Depth d = ecs.get(e, Depth.class);
+			Depth d = w.ecs.get(e, Depth.class);
 			
 			int layer = (d != null) ? d.depth : 0;
 			
@@ -595,18 +603,18 @@ public class PainterRenderer extends Renderer {
 		
 		if(Controller.debug.hitBoxes) {
 			
-			int x2 = Controller.globals.screenSize.x / 64;
-			int y2 = Controller.globals.screenSize.y / 64;
+			int cell = Controller.currentScene.world.container.cellSize;
+			
+			int x2 = Controller.globals.screenSize.x / cell;
+			int y2 = Controller.globals.screenSize.y / cell;
 			
 			for(int x = 0; x < x2; x++) {
 				for(int y = 0; y < y2; y++) {
-					Entity tod = new Entity(List.of(
-							new Pos(x*64, y*64),
-							new Size(64, 64),
+					new Entity(List.of(
+							new Pos(x*cell, y*cell),
+							new Size(cell, cell),
 							new PlainShape(30, 30, 30, Shape.RECTANGLE)
-							), ecs, true);
-					sortedLayer.get(textLayer).add(tod);
-					colBoxToDel.add(tod);
+							), textW, true);
 				}
 			}
 			
@@ -630,7 +638,9 @@ public class PainterRenderer extends Renderer {
 			
 			for(Entity e : sortedLayer.get(layer)) {
 				
-				TextureC texture = (ecs.contains(e, TextureC.class)) ? ecs.get(e, TextureC.class) : null;
+				TextureC texture = (w.ecs.contains(e, TextureC.class)) ? w.ecs.get(e, TextureC.class) : null;
+				
+				if(!w.ecs.contains(e, Pos.class)) {w.container.remove(e); continue;}
 				
 				int id = (texture != null) ? texture.TextureID : -1;
 				
@@ -649,8 +659,8 @@ public class PainterRenderer extends Renderer {
 				}
 				
 				layers.get(layer).add(new RenderWrapper(textureid, ((textureid != -1)
-						? new TextureMesh(batchedEntities.get(textureid), ecs) 
-						: new SimpleMesh(batchedEntities.get(textureid), ecs))));
+						? new TextureMesh(batchedEntities.get(textureid), w.ecs) 
+						: new SimpleMesh(batchedEntities.get(textureid), w.ecs))));
 				
 			}
 			
@@ -680,13 +690,13 @@ public class PainterRenderer extends Renderer {
 		
 	}
 
-	private void generateText(EntityManager textEcs) {
+	private void generateText(World w) {
 		
 		for(Text t : text) {
 			
 			if(t.data.isEmpty()) {continue;}
 			
-			TextFactory.generateText(t.data, t.pos, t.alignment, textEcs, true);
+			TextFactory.generateText(t.data, t.pos, t.alignment, w, true);
 			
 		}
 		

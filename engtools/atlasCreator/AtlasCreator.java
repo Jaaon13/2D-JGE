@@ -59,7 +59,7 @@ public class AtlasCreator extends Scene {
 					new Pos(defaultSizeX, defaultSizeY),
 					new Size(selected.size.x, selected.size.y),
 					new TextureC(path)
-					), entities);
+					), world);
 				
 			Controller.graphics.setScreenSize(new Point(selected.size.x + defaultSizeX, selected.size.y + defaultSizeY));
 			
@@ -101,14 +101,14 @@ public class AtlasCreator extends Scene {
 		int x = (e.PointVal.x / defaultSizeX) * defaultSizeX;
 		int y = ((e.PointVal.y / defaultSizeY) * defaultSizeY) + defaultSizeY;
 		
-		for(Entity en : entities.getVisible()) {
+		for(Entity en : world.container.getAllVisible()) {
 			
-			Pos pos = (Pos) entities.get(en, Pos.class);
+			Pos pos = (Pos) world.ecs.get(en, Pos.class);
 			
 			if(pos.x == x && pos.y == y) {
 			
 				exists = true;
-				entities.remove(en);
+				world.container.remove(en);
 				break;
 				
 			}
@@ -126,7 +126,7 @@ public class AtlasCreator extends Scene {
 					new Pos(x, y),
 					new Size(defaultSizeX, defaultSizeY),
 					new TextureC(highlight)
-					), entities);
+					), world);
 			
 			grid.add(gridPos);
 			
@@ -151,10 +151,10 @@ public class AtlasCreator extends Scene {
 				
 			grid.clear();
 			
-			entities.clear();
+			world.ecs.clear();
 			
 			if(Objects.nonNull(image)) {
-				entities.add(image);
+				world.container.add(image);
 			}
 			
 			break;
@@ -199,21 +199,12 @@ public class AtlasCreator extends Scene {
 	}
 
 	@Override
-	public void fixedUpdate() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void fixedUpdate() {}
 
 	@Override
-	public void switchedTo() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void switchedTo() {}
 
 	@Override
-	public void kill() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void kill() {}
 	
 }

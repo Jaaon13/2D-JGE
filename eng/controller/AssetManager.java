@@ -108,7 +108,6 @@ public class AssetManager {
 	}
 	
 	// Get asset based on id and file type
-	@SuppressWarnings("unchecked")
 	public <T extends Asset> T get(int inID) {
 		
 		for(Asset a : assets) {
@@ -123,7 +122,6 @@ public class AssetManager {
 	}
 	
 	// Get Asset using just the file location !cannot use for programs!
-	@SuppressWarnings("unchecked")
 	public <T extends Asset> T get(String filePath) {
 		
 		for(Asset i : assets) {
@@ -139,7 +137,6 @@ public class AssetManager {
 	}
 	
 	// Takes file path w/o the directory
-	@SuppressWarnings("unchecked")
 	public <T extends Asset> T load(String filePath) {
 		
 		Asset a;
@@ -173,7 +170,6 @@ public class AssetManager {
 	}
 	
 	// Used to load a shader specifically
-	@SuppressWarnings("unchecked")
 	public <T extends Asset> T load(String fp1, String fp2) {
 		
 		Asset a = null;
@@ -216,7 +212,7 @@ public class AssetManager {
 				return loadShader(Controller.globals.dir + filePath[0], parseFileType(filePath[0]).toCharArray()[0],
 						Controller.globals.dir + filePath[1]);
 			
-			case "atlas": // Atlas definition file // TODO: Finish making the atlas creation tool
+			case "atlas": // Atlas definition file
 				return loadAtlas(Controller.globals.dir + filePath[0]);
 				
 			default:

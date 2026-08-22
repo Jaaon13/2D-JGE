@@ -18,7 +18,6 @@ public class ReadFile {
 		try {
 			reader = new Scanner(new File(p));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

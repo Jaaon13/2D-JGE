@@ -12,6 +12,7 @@ import assets.Texture;
 import graphical.window.Window;
 import gui.factorys.Text;
 import gui.factorys.TextFactory.Alignment;
+import logger.Logger.LoggerInfo;
 
 public class GraphicsController {
 
@@ -65,14 +66,16 @@ public class GraphicsController {
 		
 	}
 	
+	public void addTextOverlay(String name, Point pos, Alignment a) {
+		
+		overlays.put(name, new Text("", pos, a));
+		
+	}
+	
 	public boolean overlayExists(String name) {
 		
 		return overlays.containsKey(name);
 		
-	}
-	
-	public void updateTextOverlay(String name, String data) {
-		overlays.get(name).data = data;
 	}
 	
 	public void removeTextOverlay(String name) {
@@ -93,6 +96,20 @@ public class GraphicsController {
 		
 	}
 
+	public void updateTextOverlay(String name, String data) {
+		Text o = overlays.get(name);
+		
+		if(o == null) {
+			Controller.logger.log(List.of(
+					"Failed to write to " + name + " overlay!",
+					"Data: " + data
+					), LoggerInfo.WARNING);
+			return;
+		}
+		
+		overlays.get(name).data = data;
+	}
+	
 	public void updateTextOverlay(String name, String data, Point newPos) {
 		overlays.get(name).data = data;
 		overlays.get(name).pos = newPos;

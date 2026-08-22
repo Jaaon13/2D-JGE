@@ -74,5 +74,14 @@ public class Vector {
 	public Vector getInverse() {
 		return new Vector(this.x * -1f, this.y * -1f);
 	}
+
+	public Vector copy() {
+		return new Vector(this.x, this.y);
+	}
+	
+	@Override
+	public String toString() {
+		return this.x + ", " + this.y;
+	}
 	
 }

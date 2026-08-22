@@ -10,16 +10,10 @@ import sceneManagment.Scene;
 public class EngineLoadingScene extends Scene {
 
 	@Override
-	public void update() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void update() {}
 
 	@Override
-	public void fixedUpdate() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void fixedUpdate() {}
 
 	@Override
 	public void switchedTo() {
@@ -29,9 +23,6 @@ public class EngineLoadingScene extends Scene {
 	}
 
 	@Override
-	public void kill() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void kill() {}
 
 }
